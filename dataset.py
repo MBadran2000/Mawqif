@@ -16,9 +16,6 @@ from sklearn.model_selection import train_test_split
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-#from pytorch_lightning.metrics.functional import accuracy, f1, auroc
-#https://torchmetrics.readthedocs.io/en/stable/metrics.html
-#https://stackoverflow.com/questions/69139618/torchmetrics-does-not-work-with-pytorchlightning
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 
@@ -50,6 +47,8 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget):
     df['stance'] = df['stance'].apply(lambda x: mapping[x])
     test_df['stance'] = test_df['stance'].apply(lambda x: mapping[x])
     train_df, val_df = train_test_split(df, test_size=0.18, stratify=df['stance'])
+    # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'])
+
     print(train_df.head())
     return train_df, val_df, test_df
 

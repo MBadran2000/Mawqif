@@ -3,11 +3,8 @@
 TrainData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 TestData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 
-#selectedTarget = 'Covid Vaccine'
-#selectedTarget = 'Digital Transformation'
-# selectedTarget = 'Women empowerment'
-selectedTarget = ['Women empowerment','Covid Vaccine','Digital Transformation']
 
+selectedTarget = ['Women empowerment', 'Covid Vaccine', 'Digital Transformation']
 
 #Ex_name = 'MARBERT_'+selectedTarget+'_Stance'
 #Ex_name = 'AraBERT_'+selectedTarget+'_Stance'
@@ -24,8 +21,9 @@ model_name = "bert-base-arabertv02"
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
 N_EPOCHS = 20
 BATCH_SIZE = 32
-# BATCH_SIZE = 32
 
+
+### Modfiy the following after each major modification
 Modification = "None"
 Version = "V1"
 

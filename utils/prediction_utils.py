@@ -65,7 +65,7 @@ def get_predictions(model, data_loader):
     _, preds = torch.max(output, dim=1)
     probs = F.softmax(output, dim=1)
   
-    texts.extend(text) # we can use .append instead of .extend
+    texts.append(text) # we can use .append instead of .extend
     predictions.extend(preds.detach())
     prediction_probs.extend(probs.detach())
 

@@ -18,9 +18,6 @@ from sklearn.model_selection import train_test_split
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
-#from pytorch_lightning.metrics.functional import accuracy, f1, auroc
-#https://torchmetrics.readthedocs.io/en/stable/metrics.html
-#https://stackoverflow.com/questions/69139618/torchmetrics-does-not-work-with-pytorchlightning
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from pytorch_lightning.callbacks import EarlyStopping
@@ -31,10 +28,6 @@ from pylab import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-# %matplotlib inline
-# %config InlineBackend.figure_format='retina'
-# sns.set(style='whitegrid', palette='muted', font_scale=1.2)
-# rcParams['figure.figsize'] = 16, 10
 tqdm.pandas()
 
 from arabert.preprocess import ArabertPreprocessor
@@ -42,8 +35,9 @@ from arabert.preprocess import ArabertPreprocessor
 import config
 from dataset import TweetEmotionDataset, TweetDataModule, load_dataset
 from model import TweetPredictor
-from utils.prediction_utils import get_predictions,  predict
-
+from utils.prediction_utils import get_predictions, predict
+from utils.save_result import save_pred_gt, log_results
+from utils.MyStanceEval import log_StanceEval
 
 pl.seed_everything(42)
 
@@ -77,7 +71,6 @@ if __name__ == '__main__':
     model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel)
 
     
-    # logger = CometLogger("lightning_logs", name=Ex_name) 
     logger = CometLogger(
      experiment_name=Ex_name ,
      api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
@@ -114,52 +107,27 @@ if __name__ == '__main__':
 
 
 
-    p = "checkpoints/"+Ex_name+"/best-checkpoint.ckpt"
-    trained_model = model.load_from_checkpoint(p,n_classes=3)
+    trained_model = model.load_from_checkpoint("checkpoints/"+Ex_name+"/best-checkpoint.ckpt")
     trained_model.freeze()
 
-
-    val_texts, val_pred, val_pred_probs, val_true = get_predictions(
-      model,
-      data_module.get_val_dataset()
-    )
-
-    class_names = ['None','Favor','Against']
-    report_val = classification_report(val_true, val_pred, target_names=class_names, zero_division=0, digits=4, output_dict=True)
-
-
-    for key, value in report_val.items():
-        if key == "accuracy":
-            logger.experiment.log_metric("val_"+key, value)
-        else:
-            logger.experiment.log_metrics(value,prefix="val_"+key)
-    logger.experiment.log_confusion_matrix(
-        val_true.tolist(),
-        val_pred.tolist(),
-        title="Val Confusion Matrix",
-        file_name="val-confusion-matrix.json"
-    )
+    log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_val_dataset(), "val")
 
     if config.log_test:
-      test_texts, test_pred, test_pred_probs, test_true = get_predictions(
-        model,
-        data_module.get_test_dataset()
-      )
-      report_test = classification_report(test_true, test_pred, target_names=class_names, zero_division=0, digits=4, output_dict=True)
-      for key, value in report_test.items():
-          if key == "accuracy":
-              logger.experiment.log_metric("test_"+key, value)
-          else:
-              logger.experiment.log_metrics(value,prefix="test_"+key)
-      logger.experiment.log_confusion_matrix(
-          test_true.tolist(),
-          test_pred.tolist(),
-          title="Test Confusion Matrix",
-          file_name="test-confusion-matrix.json"
-      )
+      log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_test_dataset(), "test")
     
     # exit()
 
+Ex_name =  config.selectedModel.split('/')[-1]+"-Overall"+config.Version
+logger = CometLogger(
+     experiment_name=Ex_name ,
+     api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
+     workspace='mbadran2000',  # Optional
+    #  save_dir='lightning_logs',  # Optional
+     project_name='Mawqif',  # Optional
+)    
+log_StanceEval(Ex_name,logger,"val")
+if config.log_test:
+  log_StanceEval(Ex_name,logger,"test")
 
 
 
