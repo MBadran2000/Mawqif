@@ -4,7 +4,7 @@ from tqdm.auto import tqdm
 import pickle
 import re
 import os
-# from comet_ml import Experiment
+from comet_ml import Experiment
 from typing import Any, Dict, Optional
 
 # Pytorch 
@@ -48,6 +48,8 @@ from utils.prediction_utils import get_predictions,  predict
 pl.seed_everything(42)
 
 if __name__ == '__main__': 
+  os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
   print(config_dict)
 
@@ -103,18 +105,14 @@ if __name__ == '__main__':
       enable_progress_bar=True,
       #log_every_n_steps=16 #default is 50
     )
-    logger.log_hyperparams({'selectedTarget':selectedTarget}) 
     logger.log_hyperparams(config_dict) 
+    logger.log_hyperparams({'selectedTarget':selectedTarget}) 
 
 
     trainer.fit(model, data_module)
     trainer.test(datamodule=data_module)
 
 
-    val_dataset = TweetEmotionDataset(val_df, tokenizer, max_token_len=config.MAX_TOKEN_COUNT)
-    test_dataset = TweetEmotionDataset(test_df, tokenizer, max_token_len=config.MAX_TOKEN_COUNT)
-
-    
 
     p = "checkpoints/"+Ex_name+"/best-checkpoint.ckpt"
     trained_model = model.load_from_checkpoint(p,n_classes=3)

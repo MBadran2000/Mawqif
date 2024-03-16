@@ -96,5 +96,3 @@ class TweetPredictor(pl.LightningModule):
     optimizer = AdamW(self.parameters(), lr=2e-5)
     return [optimizer]
 
-def load(model,path,n_classes):
-  model.load_from_checkpoint(path,n_classes=n_classes)
