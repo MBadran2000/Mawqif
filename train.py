@@ -115,6 +115,8 @@ if __name__ == '__main__':
     if config.log_test:
       log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_test_dataset(), "test")
     
+    del trained_model, model, data_module
+    
     # exit()
 
 Ex_name =  config.selectedModel.split('/')[-1]+"-Overall"+config.Version

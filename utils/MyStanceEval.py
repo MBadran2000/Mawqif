@@ -116,7 +116,7 @@ def log_StanceEval(Ex_name,logger,val_or_test):
                 logger.experiment.log_metric(f"{val_or_test} {target} {cat:<9} precision", prec_by_target[target][cat])
                 logger.experiment.log_metric(f"{val_or_test} {target} {cat:<9} recall", recall_by_target[target][cat])
                 logger.experiment.log_metric(f"{val_or_test} {target} {cat:<9} f-score",f_by_target[target][cat])
-        logger.experiment.log_metric(f"Macro F:", macro_f)
+        logger.experiment.log_metric(f"{val_or_test}  {target} Macro F", macro_f)
 
     # Compute overall macro F1-score across all targets
     overall_macro_f = sum(macro_f_by_target.values()) / len(targets)

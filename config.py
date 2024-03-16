@@ -4,7 +4,7 @@ TrainData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 TestData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 
 
-selectedTarget = ['Women empowerment', 'Covid Vaccine', 'Digital Transformation']
+selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']
 
 #Ex_name = 'MARBERT_'+selectedTarget+'_Stance'
 #Ex_name = 'AraBERT_'+selectedTarget+'_Stance'

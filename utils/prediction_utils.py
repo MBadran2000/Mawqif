@@ -44,6 +44,7 @@ def predict(text, model, tokenizer):
   )
 
   _, prediction_prop = model(encoding["input_ids"], encoding["attention_mask"])
+  prediction_prop = prediction_prop.detach()
   print("prediction_prop: ",prediction_prop)
   prediction = torch.max(prediction_prop, dim=1)
   print("prediction: ",prediction)
@@ -60,7 +61,8 @@ def get_predictions(model, data_loader):
     text = item["text"]
     labels.append(item["labels"])
 
-    _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0)) 
+    _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    output = output.detach()
 
     _, preds = torch.max(output, dim=1)
     probs = F.softmax(output, dim=1)
