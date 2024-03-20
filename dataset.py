@@ -46,8 +46,8 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget):
     mapping = {'None': 0, 'Favor': 1, 'Against': 2}
     df['stance'] = df['stance'].apply(lambda x: mapping[x])
     test_df['stance'] = test_df['stance'].apply(lambda x: mapping[x])
-    train_df, val_df = train_test_split(df, test_size=0.18, stratify=df['stance'])
-    # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'])
+    train_df, val_df = train_test_split(df, test_size=0.18, stratify=df['stance'],random_state=42)
+    # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'],random_state=42)
 
     print(train_df.head())
     return train_df, val_df, test_df

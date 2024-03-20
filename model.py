@@ -18,6 +18,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
+from torch.optim.lr_scheduler import LambdaLR
 
 # Visualisation
 import seaborn as sns
@@ -54,6 +55,10 @@ class TweetPredictor(pl.LightningModule):
     labels = batch["labels"]
     loss, outputs = self(input_ids, attention_mask, labels)
     self.log("train_loss", loss, prog_bar=True, logger=True)
+    
+    lr = self.optimizers().param_groups[0]['lr']
+    self.log('lr_abs', lr, prog_bar=True, logger=True )#, on_step=False, on_epoch=True)#, on_step=True, on_epoch=False)
+
     return {"loss": loss, "predictions": outputs, "labels": labels}
 
 
@@ -75,21 +80,30 @@ class TweetPredictor(pl.LightningModule):
     return loss
 
 
-  # def configure_optimizers(self):
-
-  #   optimizer = AdamW(self.parameters(), lr=2e-5)
-
-  #   warmup_steps = self.steps_per_epoch // 3     ## we will use third of the training examples for warmup
-  #   total_steps = self.steps_per_epoch * self.n_epochs - warmup_steps
-
-  #   scheduler = get_linear_schedule_with_warmup(
-  #     optimizer, 
-  #     warmup_steps, 
-  #     total_steps
-  #   )
-  #   return [optimizer], [scheduler]
-
   def configure_optimizers(self):
     optimizer = AdamW(self.parameters(), lr=2e-5)
-    return [optimizer]
+    warmup_steps = self.steps_per_epoch // 3     ## we will use third of the training examples for warmup
+    total_steps = self.steps_per_epoch * self.n_epochs - warmup_steps
 
+    scheduler = get_linear_schedule_with_warmup(
+      optimizer, 
+      warmup_steps, 
+      total_steps
+    )
+    return [optimizer] ,[{'scheduler':scheduler, 'interval': 'step'}]
+
+  # def configure_optimizers(self):
+  #   optimizer = AdamW(self.parameters(), lr=2e-5)
+  #   return [optimizer]
+
+  # def configure_optimizers(self):
+  #     optimizer = AdamW(self.parameters(), lr=2e-5)
+  #     warmup_epochs = self.steps_per_epoch // 3 
+  #     # num_training_steps = len(self.train_dataloader()) * self.max_epochs
+  #     warmup_scheduler = LambdaLR(optimizer, lr_lambda=lambda epoch: min((epoch + 1) / warmup_epochs, 1.0))
+      
+  #     return [ optimizer],[{'scheduler':warmup_scheduler, 'interval': 'epoch'}] 
+          
+  def lr_scheduler_step(self, scheduler,optimizer_idx, metric):
+    # scheduler.step(epoch=self.current_epoch)
+    scheduler.step()  

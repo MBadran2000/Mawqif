@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
 
   for selectedTarget in config.selectedTarget:
-    Ex_name =  config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")+config.Version
-    arabert_prep = ArabertPreprocessor(model_name=config.model_name)
+    Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
+    # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         monitor="val_loss",
         mode="min"
     )
-    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=2)
+    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=5)
 
     trainer = pl.Trainer(
       logger=logger,
@@ -96,7 +96,7 @@ if __name__ == '__main__':
       gpus=1,
       #progress_bar_refresh_rate=30
       enable_progress_bar=True,
-      #log_every_n_steps=16 #default is 50
+      log_every_n_steps=10 #default is 50
     )
     logger.log_hyperparams(config_dict) 
     logger.log_hyperparams({'selectedTarget':selectedTarget}) 
@@ -118,18 +118,19 @@ if __name__ == '__main__':
     del trained_model, model, data_module
     
     # exit()
-
-Ex_name =  config.selectedModel.split('/')[-1]+"-Overall"+config.Version
-logger = CometLogger(
-     experiment_name=Ex_name ,
-     api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
-     workspace='mbadran2000',  # Optional
-    #  save_dir='lightning_logs',  # Optional
-     project_name='Mawqif',  # Optional
-)    
-log_StanceEval(Ex_name,logger,"val")
-if config.log_test:
-  log_StanceEval(Ex_name,logger,"test")
+if len(config.selectedTarget) == 3:
+  Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
+  # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
+  logger = CometLogger(
+      experiment_name=Ex_name ,
+      api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
+      workspace='mbadran2000',  # Optional
+      #  save_dir='lightning_logs',  # Optional
+      project_name='Mawqif',  # Optional
+  )    
+  log_StanceEval(Ex_name,logger,"val")
+  if config.log_test:
+    log_StanceEval(Ex_name,logger,"test")
 
 
 

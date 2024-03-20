@@ -1,4 +1,4 @@
-to add
+to add.txt
 *.csv
 lightning_logs/
 checkpoints/
@@ -6,3 +6,4 @@ arabert/
 __pycache__/
 Fine_tuning_for_stance_classification.ipynb
 t.ipynb
+t.py
