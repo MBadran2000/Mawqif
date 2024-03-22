@@ -15,11 +15,11 @@ selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation'
 # selectedModel = "UBC-NLP/MARBERT"
 # selectedModel =  "aubmindlab/bert-base-arabertv02"
 # selectedModel = "CAMeL-Lab/bert-base-arabic-camelbert-da"
-# selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
+selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # selectedModel = 'aubmindlab/bert-large-arabertv02-twitter' ## no enough memory 
 # selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-msa-did-madar-twitter5'
 # selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-mix'
-selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
+# selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
 
 # model_name = "bert-base-arabertv02"
 
@@ -29,8 +29,8 @@ BATCH_SIZE = 32
 
 
 ### Modfiy the following after each major modification
-Modification = "None"
-Version = "V1"
+Modification = "with Weighted Loss"
+Version = "V1_WL"
 
 log_test = False
 

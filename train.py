@@ -54,7 +54,7 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
-    train_df, val_df, test_df = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget)
+    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget)
 
     data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
     data_module.setup()
@@ -68,7 +68,7 @@ if __name__ == '__main__':
       # print(batch)
       break
 
-    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel)
+    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,class_weights=class_weights)
 
     
     logger = CometLogger(

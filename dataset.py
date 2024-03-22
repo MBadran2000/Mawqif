@@ -50,7 +50,21 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget):
     # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'],random_state=42)
 
     print(train_df.head())
-    return train_df, val_df, test_df
+
+    targets = torch.tensor(np.array(train_df['stance']))
+    # Calculate class frequencies
+    class_counts = torch.bincount(targets)
+    # Calculate inverse class frequencies
+    total_samples = class_counts.sum().float()
+    class_frequencies = class_counts / total_samples
+    # Calculate inverse class weights
+    class_weights = 1.0 / class_frequencies
+    # Normalize weights
+    class_weights = class_weights / class_weights.sum()
+
+    print("Class Weights:", class_weights)
+
+    return train_df, val_df, test_df,class_weights
 
 
 class TweetEmotionDataset(Dataset):

@@ -29,13 +29,13 @@ from matplotlib import rc
 
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None):
     super().__init__()
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
     self.classifier = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
-    self.criterion = nn.CrossEntropyLoss() # for multi-class
+    self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
     self.save_hyperparameters()
 
 
