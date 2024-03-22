@@ -12,10 +12,14 @@ selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation'
 #Ex_name = 'camelbert-da_'+selectedTarget+'_Stance'
 # Ex_name = 'AraBERT-twitter_'+selectedTarget+'_Stance'
 
-#"UBC-NLP/MARBERT
-#"aubmindlab/bert-base-arabertv02"
-#"CAMeL-Lab/bert-base-arabic-camelbert-da"
-selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
+# selectedModel = "UBC-NLP/MARBERT"
+# selectedModel =  "aubmindlab/bert-base-arabertv02"
+# selectedModel = "CAMeL-Lab/bert-base-arabic-camelbert-da"
+# selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
+# selectedModel = 'aubmindlab/bert-large-arabertv02-twitter' ## no enough memory 
+# selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-msa-did-madar-twitter5'
+# selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-mix'
+selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
 
 # model_name = "bert-base-arabertv02"
 
