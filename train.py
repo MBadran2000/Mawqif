@@ -54,7 +54,7 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
-    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget)
+    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
 
     data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
     data_module.setup()
@@ -100,6 +100,8 @@ if __name__ == '__main__':
     )
     logger.log_hyperparams(config_dict) 
     logger.log_hyperparams({'selectedTarget':selectedTarget}) 
+    logger.log_hyperparams({'Loss Weights':class_weights}) 
+
 
 
     trainer.fit(model, data_module)

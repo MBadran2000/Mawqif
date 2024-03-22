@@ -29,7 +29,7 @@ from matplotlib import rc
 
 pl.seed_everything(42)
 
-def load_dataset(TrainData_name,TestData_name,selectedTarget):
+def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False):
     df = pd.read_csv(TrainData_name)
     test_df = pd.read_csv(TestData_name)
 
@@ -50,6 +50,8 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget):
     # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'],random_state=42)
 
     print(train_df.head())
+    if not Apply_Weight_loss:
+      return train_df, val_df, test_df, None
 
     targets = torch.tensor(np.array(train_df['stance']))
     # Calculate class frequencies
@@ -59,6 +61,11 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget):
     class_frequencies = class_counts / total_samples
     # Calculate inverse class weights
     class_weights = 1.0 / class_frequencies
+
+    ## decrease importance of None 
+    # class_weights[0] = (class_weights[1]+class_weights[2]) /2  #v1.1
+    # class_weights[0] = min(class_weights[1],class_weights[2])   #v1.2
+
     # Normalize weights
     class_weights = class_weights / class_weights.sum()
 

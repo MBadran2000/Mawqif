@@ -27,10 +27,11 @@ MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph
 N_EPOCHS = 20
 BATCH_SIZE = 32
 
+WEIGHTED_LOSS = True
 
 ### Modfiy the following after each major modification
-Modification = "with Weighted Loss"
-Version = "V1_WL"
+Modification = "None weight = min of others"
+Version = "V1.2_WL--test"
 
 log_test = False
 
