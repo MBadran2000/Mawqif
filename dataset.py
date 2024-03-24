@@ -51,6 +51,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
 
     print(train_df.head())
     if not Apply_Weight_loss:
+      print("Class Weights:", None)
       return train_df, val_df, test_df, None
 
     targets = torch.tensor(np.array(train_df['stance']))
@@ -69,7 +70,9 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     # Normalize weights
     class_weights = class_weights / class_weights.sum()
 
+    print("*******************************")
     print("Class Weights:", class_weights)
+    
 
     return train_df, val_df, test_df,class_weights
 

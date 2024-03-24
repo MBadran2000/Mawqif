@@ -4,7 +4,8 @@ TrainData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Train.csv'
 TestData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 
 
-selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']
+# selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']
+selectedTarget = ['All']
 # selectedTarget = [ 'Covid Vaccine']
 
 #Ex_name = 'MARBERT_'+selectedTarget+'_Stance'
@@ -24,14 +25,14 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # model_name = "bert-base-arabertv02"
 
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
-N_EPOCHS = 20
+N_EPOCHS = 40
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = True
 
 ### Modfiy the following after each major modification
-Modification = "None weight = min of others"
-Version = "V1.2_WL--test"
+Modification = "multi-target with weighted loss"
+Version = "V1.1_mtarget"
 
 log_test = False
 
