@@ -96,6 +96,7 @@ if __name__ == '__main__':
       gpus=1,
       #progress_bar_refresh_rate=30
       enable_progress_bar=True,
+      progress_bar_refresh_rate=1,
       log_every_n_steps=10 #default is 50
     )
     logger.log_hyperparams(config_dict) 
