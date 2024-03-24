@@ -65,7 +65,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
 
     ## decrease importance of None 
     # class_weights[0] = (class_weights[1]+class_weights[2]) /2  #v1.1
-    # class_weights[0] = min(class_weights[1],class_weights[2])   #v1.2
+    class_weights[0] = min(class_weights[1],class_weights[2])   #v1.2
 
     # Normalize weights
     class_weights = class_weights / class_weights.sum()

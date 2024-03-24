@@ -31,8 +31,8 @@ BATCH_SIZE = 32
 WEIGHTED_LOSS = True
 
 ### Modfiy the following after each major modification
-Modification = "multi-target with weighted loss"
-Version = "V1.1_mtarget"
+Modification = "multi-target with weighted loss,None weight = min of others"
+Version = "V1.12_mtarget"
 
 log_test = False
 
