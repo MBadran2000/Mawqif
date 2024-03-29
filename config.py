@@ -28,12 +28,12 @@ N_EPOCHS = 40
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = False
-taskWeights = [0.6,0.3,0.1]
-
+# taskWeights = [0.6,0.3,0.1]
+taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
 Modification = "multi-task parallel"
-Version = "V1.1_mtask"
+Version = "V1.2_mtask"
 
 log_test = False
 

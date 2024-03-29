@@ -35,12 +35,17 @@ class TweetPredictor(pl.LightningModule):
     self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSAR = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.taskWeights = [0.6,0.3,0.1]
+    # self.taskWeights = [0.6,0.3,0.1]
+    self.taskWeights = [1,1,1]
+    self.lossSTA=0
+    self.lossSENT=0
+    
 
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
     self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
     self.save_hyperparameters()
+    
 
 
   def forward(self, input_ids, attention_mask, labels=None):
@@ -91,11 +96,23 @@ class TweetPredictor(pl.LightningModule):
     self.log("Stance_val_loss", loss['lossSTA'],  logger=True)
     self.log("Sentiment_val_loss", loss['lossSENT'],  logger=True)
     self.log("Sarcasm_val_loss", loss['lossSAR'], logger=True)
+
+    self.lossSTA+=loss['lossSTA']
+    self.lossSENT+=loss['lossSENT']
+
     loss = loss['lossSTA']+loss['lossSAR']+loss['lossSENT']    
-    
     self.log("val_loss", loss, prog_bar=True, logger=True)
 
+
     return loss
+
+  def validation_epoch_end(self, validation_step_outputs):
+    ##Hierarchical weighting
+    self.taskWeights[0] = max(min((self.lossSTA/self.lossSENT)*self.taskWeights[0],2),1)
+    self.log("Sentance task weight ", self.taskWeights[0], logger=True)
+    self.lossSTA=0
+    self.lossSENT=0
+
 
 
   def test_step(self, batch, batch_idx):
