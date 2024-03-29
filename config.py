@@ -27,11 +27,13 @@ MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph
 N_EPOCHS = 40
 BATCH_SIZE = 32
 
-WEIGHTED_LOSS = True
+WEIGHTED_LOSS = False
+taskWeights = [0.6,0.3,0.1]
+
 
 ### Modfiy the following after each major modification
-Modification = "None weight = min of others"
-Version = "V1.2_WL--test"
+Modification = "multi-task parallel"
+Version = "V1.1_mtask"
 
 log_test = False
 
