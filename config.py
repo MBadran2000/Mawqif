@@ -31,8 +31,8 @@ BATCH_SIZE = 32
 WEIGHTED_LOSS = False
 
 ### Modfiy the following after each major modification
-Modification = "Freeze Bert with hidden layer Dim128"
-Version = "V1.31"
+Modification = "with hidden layer Dim256 Dim128"
+Version = "V1.42"
 
 log_test = False
 
