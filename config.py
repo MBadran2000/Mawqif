@@ -31,8 +31,8 @@ BATCH_SIZE = 32
 WEIGHTED_LOSS = False
 
 ### Modfiy the following after each major modification
-Modification = "with hidden layer Dim256 Dim128"
-Version = "V1.42"
+Modification = "dropout 0.2"
+Version = "V1.51"
 
 log_test = False
 
