@@ -32,8 +32,8 @@ taskWeights = [0.6,0.3,0.1]
 # taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
-Modification = "multi-task parallel with weighted loss"
-Version = "V1.4_mtask-test"
+Modification = "multi-task parallel"
+Version = "V2.1"
 
 log_test = False
 

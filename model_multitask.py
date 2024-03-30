@@ -35,6 +35,7 @@ class TweetPredictor(pl.LightningModule):
     self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 2)####2 classes
+    self.classifierSTA_final = nn.Linear(n_classes+n_classes+2,3)
     self.taskWeights = [0.6,0.3,0.1]
     # self.taskWeights = [1,1,1]
     # self.lossSTA=0
@@ -53,15 +54,19 @@ class TweetPredictor(pl.LightningModule):
 
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
-    outputSTA = self.classifierSTA(output.pooler_output) 
-    outputSTA = torch.softmax(outputSTA, dim=1) # for multi-class  
+    outputSTA1 = self.classifierSTA(output.pooler_output) 
+    # outputSTA = torch.softmax(outputSTA1, dim=1) # for multi-class  
 
-    outputSENT = self.classifierSENT(output.pooler_output) 
-    outputSENT = torch.softmax(outputSENT, dim=1) # for multi-class   
+    outputSENT1 = self.classifierSENT(output.pooler_output) 
+    outputSENT = torch.softmax(outputSENT1, dim=1) # for multi-class   
 
-    outputSAR = self.classifierSAR(output.pooler_output) 
+    outputSAR1 = self.classifierSAR(output.pooler_output) 
     # outputSAR = torch.softmax(outputSAR, dim=1) # for multi-class  
-    outputSAR = torch.sigmoid(outputSAR) 
+    outputSAR = torch.sigmoid(outputSAR1) 
+
+    output_concat = torch.cat(( outputSTA1, outputSENT1, outputSAR1), dim=1) 
+    output_concat = self.classifierSTA_final(output_concat)
+    outputSTA = torch.softmax(output_concat, dim=1)
 
     
     loss = 0
