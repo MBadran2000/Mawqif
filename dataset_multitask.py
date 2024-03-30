@@ -43,7 +43,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     test_df['stance'] = test_df['stance'].fillna(value="None")
     test_df[test_df["stance"].isna()]
     
-    mapping = { 'Yes': 1, 'No': 2}
+    mapping = { 'Yes': 0, 'No': 1}
     df['sarcasm'] = df['sarcasm'].apply(lambda x: mapping[x])
     test_df['sarcasm'] = test_df['sarcasm'].apply(lambda x: mapping[x])
     mapping = {'Neutral': 0, 'Positive': 1, 'Negative': 2}

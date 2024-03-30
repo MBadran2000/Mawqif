@@ -64,7 +64,6 @@ if __name__ == '__main__':
       assert batch["input_ids"].shape == batch["attention_mask"].shape
       assert batch["input_ids"].shape[0] == config.BATCH_SIZE
       assert batch["input_ids"].shape[1] == config.MAX_TOKEN_COUNT
-      print(batch["labels"]["STA"])
       assert batch["labels"]["STA"].shape[0] == config.BATCH_SIZE
       # print(batch)
       break

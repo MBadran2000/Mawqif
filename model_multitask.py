@@ -34,16 +34,19 @@ class TweetPredictor(pl.LightningModule):
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
     self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.classifierSAR = nn.Linear(self.bert.config.hidden_size, n_classes)
-    # self.taskWeights = [0.6,0.3,0.1]
-    self.taskWeights = [1,1,1]
-    self.lossSTA=0
-    self.lossSENT=0
+    self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 2)####2 classes
+    self.taskWeights = [0.6,0.3,0.1]
+    # self.taskWeights = [1,1,1]
+    # self.lossSTA=0
+    # self.lossSENT=0
     
 
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
-    self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+    self.criterionSTA = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+    self.criterion = nn.CrossEntropyLoss() # for multi-class
+    self.criterion = nn.CrossEntropyLoss() # for multi-class
+
     self.save_hyperparameters()
     
 
@@ -64,7 +67,7 @@ class TweetPredictor(pl.LightningModule):
     loss = 0
     if labels is not None:
       loss = dict(
-        lossSTA = self.taskWeights[0]*self.criterion(outputSTA,labels['STA']) ,
+        lossSTA = self.taskWeights[0]*self.criterionSTA(outputSTA,labels['STA']) ,
         lossSENT = self.taskWeights[1]*self.criterion(outputSENT,labels['SENT']) ,
         lossSAR = self.taskWeights[2]*self.criterion(outputSAR,labels['SAR']))
     return loss, outputSTA
@@ -97,8 +100,9 @@ class TweetPredictor(pl.LightningModule):
     self.log("Sentiment_val_loss", loss['lossSENT'],  logger=True)
     self.log("Sarcasm_val_loss", loss['lossSAR'], logger=True)
 
-    self.lossSTA+=loss['lossSTA']
-    self.lossSENT+=loss['lossSENT']
+    ##Hierarchical weighting
+    # self.lossSTA+=loss['lossSTA']
+    # self.lossSENT+=loss['lossSENT']
 
     loss = loss['lossSTA']+loss['lossSAR']+loss['lossSENT']    
     self.log("val_loss", loss, prog_bar=True, logger=True)
@@ -106,12 +110,12 @@ class TweetPredictor(pl.LightningModule):
 
     return loss
 
-  def validation_epoch_end(self, validation_step_outputs):
-    ##Hierarchical weighting
-    self.taskWeights[0] = max(min((self.lossSTA/self.lossSENT)*self.taskWeights[0],2),1)
-    self.log("Sentance task weight ", self.taskWeights[0], logger=True)
-    self.lossSTA=0
-    self.lossSENT=0
+  ##Hierarchical weighting
+  # def validation_epoch_end(self, validation_step_outputs):
+  #   self.taskWeights[0] = max(min((self.lossSTA/self.lossSENT)*self.taskWeights[0],2),1)
+  #   self.log("Sentance task weight ", self.taskWeights[0], logger=True)
+  #   self.lossSTA=0
+  #   self.lossSENT=0
 
 
 

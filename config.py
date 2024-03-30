@@ -27,13 +27,13 @@ MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph
 N_EPOCHS = 40
 BATCH_SIZE = 32
 
-WEIGHTED_LOSS = False
-# taskWeights = [0.6,0.3,0.1]
-taskWeights = "Hierarchical Weighting"
+WEIGHTED_LOSS = True
+taskWeights = [0.6,0.3,0.1]
+# taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
-Modification = "multi-task parallel"
-Version = "V1.2_mtask"
+Modification = "multi-task parallel with weighted loss"
+Version = "V1.4_mtask-test"
 
 log_test = False
 
