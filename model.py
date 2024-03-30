@@ -32,7 +32,13 @@ class TweetPredictor(pl.LightningModule):
   def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None):
     super().__init__()
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
-    self.classifier = nn.Linear(self.bert.config.hidden_size, n_classes)
+    # Freeze the BERT model
+    for param in self.bert.parameters():
+        param.requires_grad = False
+
+    self.classifier1 = nn.Linear(self.bert.config.hidden_size, 128)
+    self.classifier2 = nn.Linear(128, n_classes)
+
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
     self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
@@ -41,7 +47,8 @@ class TweetPredictor(pl.LightningModule):
 
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
-    output = self.classifier(output.pooler_output) 
+    output = self.classifier1(output.pooler_output) 
+    output = self.classifier2(output)  
     output = torch.softmax(output, dim=1) # for multi-class   
     loss = 0
     if labels is not None:

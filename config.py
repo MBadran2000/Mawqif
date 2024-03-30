@@ -20,6 +20,7 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-msa-did-madar-twitter5'
 # selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-mix'
 # selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
+# selectedModel = 'moha/arabert_c19'
 
 # model_name = "bert-base-arabertv02"
 
@@ -27,11 +28,11 @@ MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph
 N_EPOCHS = 40
 BATCH_SIZE = 32
 
-WEIGHTED_LOSS = True
+WEIGHTED_LOSS = False
 
 ### Modfiy the following after each major modification
-Modification = "None weight = min of others"
-Version = "V1.2_WL--test"
+Modification = "Freeze Bert with hidden layer Dim128"
+Version = "V1.31"
 
 log_test = False
 
