@@ -34,8 +34,8 @@ class TweetPredictor(pl.LightningModule):
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
     self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 2)####2 classes
-    self.classifierSTA_final = nn.Linear(n_classes+n_classes+2,3)
+    self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 1)####2 classes
+    self.classifierSTA_final = nn.Linear(n_classes+n_classes+1,3)
     self.taskWeights = [0.6,0.3,0.1]
     # self.taskWeights = [1,1,1]
     # self.lossSTA=0
@@ -45,8 +45,8 @@ class TweetPredictor(pl.LightningModule):
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
     self.criterionSTA = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
-    self.criterion = nn.CrossEntropyLoss() # for multi-class
-    self.criterion = nn.CrossEntropyLoss() # for multi-class
+    self.criterionSENT = nn.CrossEntropyLoss() # for multi-class
+    self.criterionSAR = nn.BCELoss() # for multi-class
 
     self.save_hyperparameters()
     
@@ -73,8 +73,8 @@ class TweetPredictor(pl.LightningModule):
     if labels is not None:
       loss = dict(
         lossSTA = self.taskWeights[0]*self.criterionSTA(outputSTA,labels['STA']) ,
-        lossSENT = self.taskWeights[1]*self.criterion(outputSENT,labels['SENT']) ,
-        lossSAR = self.taskWeights[2]*self.criterion(outputSAR,labels['SAR']))
+        lossSENT = self.taskWeights[1]*self.criterionSENT(outputSENT,labels['SENT']) ,
+        lossSAR = self.taskWeights[2]*self.criterionSAR(outputSAR.reshape(-1),labels['SAR'].float())*3)
     return loss, outputSTA
  
 

@@ -32,8 +32,8 @@ taskWeights = [0.6,0.3,0.1]
 # taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
-Modification = "multi-task parallel"
-Version = "V2.1"
+Modification = "multi-task parallel sarcasm loss to BCE"
+Version = "V2.2"
 
 log_test = False
 
