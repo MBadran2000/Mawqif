@@ -44,11 +44,15 @@ class TweetPredictor(pl.LightningModule):
 
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
-    self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+    # self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+    self.criterion = nn.NLLLoss()
     self.save_hyperparameters()
 
     # Initialize weight decay
     self.weight_decay = weight_decay 
+
+
+    
 
 
 
@@ -64,7 +68,9 @@ class TweetPredictor(pl.LightningModule):
     output = self.dropout(output.pooler_output)
     output = self.classifier(output) 
 
-    output = torch.softmax(output, dim=1) # for multi-class   
+    # output = torch.softmax(output, dim=1) # for multi-class   
+    output = torch.nn.functional.log_softmax(output, dim=1) # for multi-class   
+
     loss = 0
     if labels is not None:
         loss = self.criterion(output, labels) 

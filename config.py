@@ -29,11 +29,11 @@ N_EPOCHS = 40
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = False
-WEIGHT_DECAY = 0.0001
+WEIGHT_DECAY = 0.001
 
 ### Modfiy the following after each major modification
-Modification = "dropout 0.1 with weight decay 0.0001"
-Version = "V1.65"
+Modification = "NLLLoss"
+Version = "V1.7"
 
 log_test = False
 
