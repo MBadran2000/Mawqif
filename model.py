@@ -29,7 +29,7 @@ from matplotlib import rc
 
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0):
     super().__init__()
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
     # # Freeze the BERT model
@@ -40,19 +40,27 @@ class TweetPredictor(pl.LightningModule):
     # self.classifier2 = nn.Linear(256, 128)
     # self.classifier3 = nn.Linear(128, n_classes)
     self.classifier = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.dropout = nn.Dropout(0.2)
+    self.dropout = nn.Dropout(0.1)
 
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
     self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
     self.save_hyperparameters()
 
+    # Initialize weight decay
+    self.weight_decay = weight_decay 
+
+
 
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
-    # output = self.classifier1(output.pooler_output) 
+    # output = self.dropout(output.pooler_output)
+    # output = self.classifier1(output)
+    # output = self.dropout(output) 
     # output = self.classifier2(output)  
+    # output = self.dropout(output)
     # output = self.classifier3(output)  
+
     output = self.dropout(output.pooler_output)
     output = self.classifier(output) 
 
@@ -95,7 +103,9 @@ class TweetPredictor(pl.LightningModule):
 
 
   def configure_optimizers(self):
+    # optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) #Not working
     optimizer = AdamW(self.parameters(), lr=2e-5)
+
     warmup_steps = self.steps_per_epoch // 3     ## we will use third of the training examples for warmup
     total_steps = self.steps_per_epoch * self.n_epochs - warmup_steps
 
