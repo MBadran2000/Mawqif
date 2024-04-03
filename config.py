@@ -29,11 +29,11 @@ N_EPOCHS = 40
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = False
-WEIGHT_DECAY = 0.001
+WEIGHT_DECAY = 0.00001
 
 ### Modfiy the following after each major modification
-Modification = "NLLLoss"
-Version = "V1.7"
+Modification = "no drouput weight decay =  0.00001"
+Version = "V1.8"
 
 log_test = False
 

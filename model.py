@@ -19,12 +19,32 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from torch.optim.lr_scheduler import LambdaLR
+import torch.nn.functional as F
 
 # Visualisation
 import seaborn as sns
 from pylab import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import rc
+
+class LabelSmoothingCrossEntropyLoss(torch.nn.Module):
+    def __init__(self, epsilon=0.1, num_classes=10):
+        super(LabelSmoothingCrossEntropyLoss, self).__init__()
+        self.epsilon = epsilon
+        self.num_classes = num_classes
+
+    def forward(self, logits, target):
+        # Convert target labels to one-hot encoding
+        target_one_hot = F.one_hot(target, num_classes=self.num_classes)
+        
+        # Apply label smoothing
+        target_smooth = (1 - self.epsilon) * target_one_hot + (self.epsilon / self.num_classes)
+        # print(target_smooth)
+        
+        # Compute cross-entropy loss
+        loss = F.cross_entropy(logits, target_smooth.argmax(dim=1))
+        
+        return loss
 
 
 class TweetPredictor(pl.LightningModule):
@@ -44,8 +64,8 @@ class TweetPredictor(pl.LightningModule):
 
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
-    # self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
-    self.criterion = nn.NLLLoss()
+    self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+    # self.criterion = LabelSmoothingCrossEntropyLoss(epsilon=0.7, num_classes=n_classes)
     self.save_hyperparameters()
 
     # Initialize weight decay
@@ -65,15 +85,24 @@ class TweetPredictor(pl.LightningModule):
     # output = self.dropout(output)
     # output = self.classifier3(output)  
 
-    output = self.dropout(output.pooler_output)
-    output = self.classifier(output) 
+    # output = self.dropout(output.pooler_output)
+    # output = self.classifier(output) 
 
-    # output = torch.softmax(output, dim=1) # for multi-class   
-    output = torch.nn.functional.log_softmax(output, dim=1) # for multi-class   
+    output = self.classifier(output.pooler_output) 
+
+    output = torch.softmax(output, dim=1) # for multi-class   
+    # output = F.log_softmax(output, dim=1) # for multi-class   
 
     loss = 0
     if labels is not None:
+        # labels = F.one_hot(labels, num_classes=3)
+        # self.epsilon = 0.1
+        # labels = (1 - self.epsilon) * labels + (self.epsilon / 3)
+        # print(output.shape,labels.shape)
+        # print(output,labels)
+
         loss = self.criterion(output, labels) 
+        
     return loss, output
 
 
@@ -109,8 +138,8 @@ class TweetPredictor(pl.LightningModule):
 
 
   def configure_optimizers(self):
-    # optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) #Not working
-    optimizer = AdamW(self.parameters(), lr=2e-5)
+    optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) #Not working
+    # optimizer = AdamW(self.parameters(), lr=2e-5)
 
     warmup_steps = self.steps_per_epoch // 3     ## we will use third of the training examples for warmup
     total_steps = self.steps_per_epoch * self.n_epochs - warmup_steps
