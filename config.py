@@ -34,6 +34,6 @@ LEARNING_RATE = 2e-5
 
 ### Modfiy the following after each major modification
 Modification = "Add prompt"
-Version = "V2.0"
+Version = "V2.1"
 
 log_test = False
