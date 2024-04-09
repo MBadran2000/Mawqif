@@ -35,10 +35,23 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
 
     df= df[df['target'] == selectedTarget]
     test_df= test_df[test_df['target'] == selectedTarget]
-    df = df[['ID','text','stance']]
-    test_df = test_df[['ID','text','stance']]
+    df = df[['ID','text','stance','target']]
+    test_df = test_df[['ID','text','stance','target']]
 
     df['stance'] = df['stance'].fillna(value="None")
+
+    ### prompt
+    mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
+    target = df['target'].copy()
+    target = target.apply(lambda x: mapping_t[x])
+    df['text']=df['text']+'. موقف الكاتب من' +target + 'هو'
+    target = test_df['target'].copy()
+    target = target.apply(lambda x: mapping_t[x])
+    test_df['text']=test_df['text']+'. موقف الكاتب من' +target + 'هو'
+    df=df.drop('target', axis=1)
+    test_df=test_df.drop('target', axis=1)
+    ##
+
     df[df["stance"].isna()]
     test_df['stance'] = test_df['stance'].fillna(value="None")
     test_df[test_df["stance"].isna()]

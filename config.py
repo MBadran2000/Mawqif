@@ -33,7 +33,7 @@ WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 
 ### Modfiy the following after each major modification
-Modification = "None"
-Version = "V1.9"
+Modification = "Add prompt"
+Version = "V2.0"
 
 log_test = False
