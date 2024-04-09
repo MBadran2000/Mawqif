@@ -20,6 +20,7 @@ from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, 
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from torch.optim.lr_scheduler import LambdaLR
 import torch.nn.functional as F
+import torch.nn.functional as F
 
 # Visualisation
 import seaborn as sns
@@ -47,9 +48,42 @@ class LabelSmoothingCrossEntropyLoss(torch.nn.Module):
         return loss
 
 
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2, weight=None, size_average=True):
+        super(FocalLoss, self).__init__()
+        self.gamma = gamma
+        self.weight = weight
+        self.size_average = size_average
+        
+
+    def forward(self, logits, target):
+        if logits.dim() > 2:
+            logits = logits.view(logits.size(0), logits.size(1), -1)  # N,C,H,W => N,C,H*W
+            logits = logits.transpose(1, 2)                        # N,C,H*W => N,H*W,C
+            logits = logits.contiguous().view(-1, logits.size(2))   # N,H*W,C => N*H*W,C
+        target = target.view(-1, 1)
+
+        # logpt = F.log_softmax(logits, dim=1)
+        logpt = logits
+        logpt = logpt.gather(1, target)
+        logpt = logpt.view(-1)
+        pt = logpt.exp()
+
+        if self.weight is not None:
+            logpt = logpt * self.weight.gather(0, target.view(-1))
+
+        loss = -1 * (1 - pt) ** self.gamma * logpt
+
+        if self.size_average:
+            return loss.mean()
+        else:
+            return loss.sum()
+
+
+
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5):
     super().__init__()
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
     # # Freeze the BERT model
@@ -65,11 +99,14 @@ class TweetPredictor(pl.LightningModule):
     self.steps_per_epoch = steps_per_epoch
     self.n_epochs = n_epochs
     self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
-    # self.criterion = LabelSmoothingCrossEntropyLoss(epsilon=0.7, num_classes=n_classes)
+    # self.criterion = LabelSmoothingCrossEntropyLoss(epsilon=0.1, num_classes=n_classes)
+    # self.criterion = FocalLoss(gamma=4, weight=class_weights)
+
     self.save_hyperparameters()
 
     # Initialize weight decay
     self.weight_decay = weight_decay 
+    self.lr = lr
 
 
     
@@ -85,22 +122,16 @@ class TweetPredictor(pl.LightningModule):
     # output = self.dropout(output)
     # output = self.classifier3(output)  
 
-    # output = self.dropout(output.pooler_output)
-    # output = self.classifier(output) 
+    output = self.dropout(output.pooler_output)
+    output = self.classifier(output) 
 
-    output = self.classifier(output.pooler_output) 
+    # output = self.classifier(output.pooler_output) 
 
-    output = torch.softmax(output, dim=1) # for multi-class   
-    # output = F.log_softmax(output, dim=1) # for multi-class   
+    output = torch.softmax(output, dim=1) # for cross entropy
+    # output = F.log_softmax(output, dim=1) # for focal or nllloss
 
     loss = 0
     if labels is not None:
-        # labels = F.one_hot(labels, num_classes=3)
-        # self.epsilon = 0.1
-        # labels = (1 - self.epsilon) * labels + (self.epsilon / 3)
-        # print(output.shape,labels.shape)
-        # print(output,labels)
-
         loss = self.criterion(output, labels) 
         
     return loss, output
@@ -138,8 +169,10 @@ class TweetPredictor(pl.LightningModule):
 
 
   def configure_optimizers(self):
-    optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) #Not working
-    # optimizer = AdamW(self.parameters(), lr=2e-5)
+    # optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) 
+    optimizer = AdamW(self.parameters(), lr=self.lr)
+    # optimizer = torch.optim.Adagrad(self.parameters(), lr=self.lr)
+    print(optimizer)
 
     warmup_steps = self.steps_per_epoch // 3     ## we will use third of the training examples for warmup
     total_steps = self.steps_per_epoch * self.n_epochs - warmup_steps

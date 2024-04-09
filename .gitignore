@@ -7,3 +7,5 @@ __pycache__/
 Fine_tuning_for_stance_classification.ipynb
 t.ipynb
 t.py
+checkpoints_test.py
+wrong_checkpoints/

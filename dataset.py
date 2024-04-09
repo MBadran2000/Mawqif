@@ -27,7 +27,7 @@ from matplotlib import rc
 
 
 
-pl.seed_everything(42)
+# pl.seed_everything(42)
 
 def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False):
     df = pd.read_csv(TrainData_name)

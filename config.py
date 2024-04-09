@@ -29,11 +29,11 @@ N_EPOCHS = 40
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = False
-WEIGHT_DECAY = 0.00001
+WEIGHT_DECAY = 0.001
+LEARNING_RATE = 2e-5
 
 ### Modfiy the following after each major modification
-Modification = "no drouput weight decay =  0.00001"
-Version = "V1.8"
+Modification = "None"
+Version = "V1.9"
 
 log_test = False
-
