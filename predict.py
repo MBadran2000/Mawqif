@@ -30,13 +30,14 @@ from matplotlib import rc
 
 import torch.nn.functional as F
 from utils.prediction_utils import get_predictions,  predict
+from text_preprocessor import TextPreprocessor
 
 
 trained_model = TweetPredictor.load_from_checkpoint("lightning_logs/tweet-stance/version_0/checkpoints/epoch=19-step=620.ckpt", n_classes=3)
 trained_model.freeze()
 
-val_dataset = TweetDataModule(val_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
-test_df = TweetDataModule(test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
+val_dataset = TweetDataModule(val_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT, text_preprocessor=TextPreprocessor())
+test_df = TweetDataModule(test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT, text_preprocessor=TextPreprocessor())
 
 val_texts, val_pred, val_pred_probs, val_true = get_predictions(
   trained_model,

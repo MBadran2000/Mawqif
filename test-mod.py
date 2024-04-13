@@ -34,6 +34,7 @@ from arabert.preprocess import ArabertPreprocessor
 
 import config
 from dataset import TweetEmotionDataset, TweetDataModule, load_dataset
+from text_preprocessor import TextPreprocessor
 from model import TweetPredictor
 from utils.prediction_utils import get_predictions, predict
 from utils.save_result import save_pred_gt, log_results
@@ -56,7 +57,7 @@ if __name__ == '__main__':
 
     train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
 
-    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
+    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT, text_preprocessor=TextPreprocessor())
     data_module.setup()
 
     for batch in data_module.train_dataloader():

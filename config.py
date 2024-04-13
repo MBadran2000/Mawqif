@@ -37,3 +37,5 @@ Modification = "None"
 Version = "V1.9"
 
 log_test = False
+
+emoji_file_name = '/home/mo2men/Master/NLP/Stance Detection/Mawqif/emojis.csv'
