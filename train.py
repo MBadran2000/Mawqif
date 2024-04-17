@@ -22,6 +22,9 @@ from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, 
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from pytorch_lightning.callbacks import EarlyStopping
 
+from peft import LoraConfig, TaskType
+from peft import get_peft_model
+
 # Visualisation
 import seaborn as sns
 from pylab import rcParams
@@ -53,6 +56,20 @@ if __name__ == '__main__':
     # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
+
+    if config.USE_LORA:
+      lora_config = LoraConfig(
+      r=16,
+      # target_modules=["q_proj", "v_proj"],
+      target_modules=["query", "value"],
+      task_type=TaskType.SEQ_CLS,
+      lora_alpha=32,
+      lora_dropout=0.05
+      )
+      model = get_peft_model(model, lora_config)
+      model.print_trainable_parameters()
+      print("LORA")
+      print(model.print_trainable_parameters())
 
     train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
 

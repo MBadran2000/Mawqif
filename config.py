@@ -31,8 +31,9 @@ BATCH_SIZE = 32
 WEIGHTED_LOSS = False
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
+USE_LORA = True
 
 ### Modfiy the following after each major modification
-Modification = "None"
-Version = "V2.2"
+Modification = "with LoRA"
+Version = "V4.1"
 log_test = False
