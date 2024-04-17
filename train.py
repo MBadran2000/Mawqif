@@ -39,8 +39,7 @@ from utils.prediction_utils import get_predictions, predict
 from utils.save_result import save_pred_gt, log_results
 from utils.MyStanceEval import log_StanceEval
 
-# pl.seed_everything(42)
-pl.seed_everything(6)
+pl.seed_everything(42)
 
 if __name__ == '__main__': 
   os.environ["TOKENIZERS_PARALLELISM"] = "false"

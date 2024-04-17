@@ -33,6 +33,6 @@ WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 
 ### Modfiy the following after each major modification
-Modification = "random seed 6"
-Version = "V0.6"
+Modification = "None"
+Version = "V2.2"
 log_test = False
