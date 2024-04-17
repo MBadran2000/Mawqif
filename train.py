@@ -55,21 +55,7 @@ if __name__ == '__main__':
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
     # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
-    model = AutoModel.from_pretrained(config.selectedModel)
-
-    if config.USE_LORA:
-      lora_config = LoraConfig(
-      r=16,
-      # target_modules=["q_proj", "v_proj"],
-      target_modules=["query", "value"],
-      task_type=TaskType.SEQ_CLS,
-      lora_alpha=32,
-      lora_dropout=0.05
-      )
-      model = get_peft_model(model, lora_config)
-      model.print_trainable_parameters()
-      print("LORA")
-      print(model.print_trainable_parameters())
+    # model = AutoModel.from_pretrained(config.selectedModel)
 
     train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
 
@@ -85,7 +71,7 @@ if __name__ == '__main__':
       # print(batch)
       break
 
-    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,class_weights=class_weights,weight_decay = config.WEIGHT_DECAY, lr = config.LEARNING_RATE)
+    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,class_weights=class_weights,weight_decay = config.WEIGHT_DECAY, lr = config.LEARNING_RATE,use_LoRA = config.USE_LORA)
 
     
     logger = CometLogger(

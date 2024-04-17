@@ -21,6 +21,8 @@ from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from torch.optim.lr_scheduler import LambdaLR
 import torch.nn.functional as F
 import torch.nn.functional as F
+from peft import LoraConfig, TaskType
+from peft import get_peft_model
 
 # Visualisation
 import seaborn as sns
@@ -83,9 +85,13 @@ class FocalLoss(nn.Module):
 
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5, use_LoRA = False):
     super().__init__()
     self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
+
+
+
+
     # # Freeze the BERT model
     # for param in self.bert.parameters():
     #     param.requires_grad = False
@@ -108,13 +114,23 @@ class TweetPredictor(pl.LightningModule):
     self.weight_decay = weight_decay 
     self.lr = lr
 
+    if use_LoRA:
+      lora_config = LoraConfig(
+      r=16,
+      target_modules=["query", "value"],
+      # task_type=TaskType.SEQ_CLS,
+      lora_alpha=32,
+      lora_dropout=0.05
+      )
+      self.bert = get_peft_model(self.bert, lora_config)
+      print("LORA")
+      self.bert.print_trainable_parameters()
 
-    
 
-
-
+  
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
+
     # output = self.dropout(output.pooler_output)
     # output = self.classifier1(output)
     # output = self.dropout(output) 

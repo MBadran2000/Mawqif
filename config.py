@@ -34,6 +34,6 @@ LEARNING_RATE = 2e-5
 USE_LORA = True
 
 ### Modfiy the following after each major modification
-Modification = "with LoRA"
+Modification = "with LoRA fixed" # need more epochs
 Version = "V4.1"
 log_test = False
