@@ -9,3 +9,4 @@ t.ipynb
 t.py
 checkpoints_test.py
 wrong_checkpoints/
+.gitignore

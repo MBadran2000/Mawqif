@@ -41,15 +41,15 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     df['stance'] = df['stance'].fillna(value="None")
 
     ### prompt
-    mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
-    target = df['target'].copy()
-    target = target.apply(lambda x: mapping_t[x])
-    # df['text']=df['text']+'. موقف الكاتب من' +target + 'هو'
-    df['text']=df['text']+'.' +target 
-    target = test_df['target'].copy()
-    target = target.apply(lambda x: mapping_t[x])
-    # test_df['text']=test_df['text']+'. موقف الكاتب من' +target + 'هو'
-    test_df['text']=test_df['text']+'.' +target 
+    # mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
+    # target = df['target'].copy()
+    # target = target.apply(lambda x: mapping_t[x])
+    # # df['text']=df['text']+'. موقف الكاتب من' +target + 'هو'
+    # df['text']=df['text']+'.' +target 
+    # target = test_df['target'].copy()
+    # target = target.apply(lambda x: mapping_t[x])
+    # # test_df['text']=test_df['text']+'. موقف الكاتب من' +target + 'هو'
+    # test_df['text']=test_df['text']+'.' +target 
     df=df.drop('target', axis=1)
     test_df=test_df.drop('target', axis=1)
     ##
