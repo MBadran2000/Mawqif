@@ -68,7 +68,7 @@ if __name__ == '__main__':
       # print(batch)
       break
 
-    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,class_weights=class_weights,weight_decay = config.WEIGHT_DECAY)
+    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE,class_weights=class_weights, config = config_dict )
 
     
     # logger = CometLogger(

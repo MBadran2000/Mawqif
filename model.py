@@ -21,7 +21,7 @@ from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from torch.optim.lr_scheduler import LambdaLR
 import torch.nn.functional as F
 import torch.nn.functional as F
-from peft import LoraConfig, TaskType
+from peft import LoraConfig, TaskType, LoKrConfig, LoHaConfig, AdaLoraConfig
 from peft import get_peft_model
 
 # Visualisation
@@ -30,102 +30,53 @@ from pylab import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-class LabelSmoothingCrossEntropyLoss(torch.nn.Module):
-    def __init__(self, epsilon=0.1, num_classes=10):
-        super(LabelSmoothingCrossEntropyLoss, self).__init__()
-        self.epsilon = epsilon
-        self.num_classes = num_classes
-
-    def forward(self, logits, target):
-        # Convert target labels to one-hot encoding
-        target_one_hot = F.one_hot(target, num_classes=self.num_classes)
-        
-        # Apply label smoothing
-        target_smooth = (1 - self.epsilon) * target_one_hot + (self.epsilon / self.num_classes)
-        # print(target_smooth)
-        
-        # Compute cross-entropy loss
-        loss = F.cross_entropy(logits, target_smooth.argmax(dim=1))
-        
-        return loss
-
-
-class FocalLoss(nn.Module):
-    def __init__(self, gamma=2, weight=None, size_average=True):
-        super(FocalLoss, self).__init__()
-        self.gamma = gamma
-        self.weight = weight
-        self.size_average = size_average
-        
-
-    def forward(self, logits, target):
-        if logits.dim() > 2:
-            logits = logits.view(logits.size(0), logits.size(1), -1)  # N,C,H,W => N,C,H*W
-            logits = logits.transpose(1, 2)                        # N,C,H*W => N,H*W,C
-            logits = logits.contiguous().view(-1, logits.size(2))   # N,H*W,C => N*H*W,C
-        target = target.view(-1, 1)
-
-        # logpt = F.log_softmax(logits, dim=1)
-        logpt = logits
-        logpt = logpt.gather(1, target)
-        logpt = logpt.view(-1)
-        pt = logpt.exp()
-
-        if self.weight is not None:
-            logpt = logpt * self.weight.gather(0, target.view(-1))
-
-        loss = -1 * (1 - pt) ** self.gamma * logpt
-
-        if self.size_average:
-            return loss.mean()
-        else:
-            return loss.sum()
-
+from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeftModel
 
 
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5, use_LoRA = False):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, class_weights=None ,config = None): #n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5, use_PEFT = 0):
     super().__init__()
-    self.bert = AutoModel.from_pretrained(selectedModel, return_dict=True)
 
-
-
+    self.bert = AutoModel.from_pretrained(config['selectedModel'], return_dict=True)
 
     # # Freeze the BERT model
-    # for param in self.bert.parameters():
-    #     param.requires_grad = False
+    if config['FREEZE_BERT']==True:
+      print("Freezing Bert")
+      for param in self.bert.parameters():
+          param.requires_grad = False
 
     # self.classifier1 = nn.Linear(self.bert.config.hidden_size, 256)
     # self.classifier2 = nn.Linear(256, 128)
     # self.classifier3 = nn.Linear(128, n_classes)
     self.classifier = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.dropout = nn.Dropout(0.1)
+    self.dropout = nn.Dropout(config["DROPOUT"])
 
     self.steps_per_epoch = steps_per_epoch
-    self.n_epochs = n_epochs
-    self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
-    # self.criterion = LabelSmoothingCrossEntropyLoss(epsilon=0.1, num_classes=n_classes)
-    # self.criterion = FocalLoss(gamma=4, weight=class_weights)
+    self.n_epochs = config['N_EPOCHS']
+
+    if config['LOSS']==0:
+      self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+      self.softmax = torch.softmax
+      print("loss: CrossEntropyLoss" )
+    elif config['LOSS']==1:
+      self.criterion = LabelSmoothingCrossEntropyLoss(epsilon=0.1, num_classes=n_classes)
+      self.softmax = F.log_softmax
+      print("loss: LabelSmoothingCrossEntropyLoss" )
+    elif config['LOSS']==2:
+      self.criterion = FocalLoss(gamma=4, weight=class_weights)
+      self.softmax = F.log_softmax
+      print("loss: FocalLoss" )
 
     self.save_hyperparameters()
 
     # Initialize weight decay
-    self.weight_decay = weight_decay 
-    self.lr = lr
+    self.weight_decay = config['WEIGHT_DECAY']
+    self.lr = config['LEARNING_RATE']
 
-    if use_LoRA:
-      lora_config = LoraConfig(
-      r=16,
-      target_modules=["query", "value"],
-      # task_type=TaskType.SEQ_CLS,
-      lora_alpha=32,
-      lora_dropout=0.05
-      )
-      self.bert = get_peft_model(self.bert, lora_config)
-      print("LORA")
-      self.bert.print_trainable_parameters()
+    self.bert = getPeftModel(self.bert,config['USE_PEFT'])
 
+    
 
   
   def forward(self, input_ids, attention_mask, labels=None):
@@ -143,7 +94,8 @@ class TweetPredictor(pl.LightningModule):
 
     # output = self.classifier(output.pooler_output) 
 
-    output = torch.softmax(output, dim=1) # for cross entropy
+    output = self.softmax(output, dim=1)
+    # output = torch.softmax(output, dim=1) # for cross entropy
     # output = F.log_softmax(output, dim=1) # for focal or nllloss
 
     loss = 0

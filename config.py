@@ -25,15 +25,18 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # model_name = "bert-base-arabertv02"
 
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
-N_EPOCHS = 40
+N_EPOCHS = 100
 BATCH_SIZE = 32
 
 WEIGHTED_LOSS = False
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
-USE_LORA = True
+USE_PEFT = 1 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
+LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
+FREEZE_BERT = False
+DROPOUT = 0.1
 
 ### Modfiy the following after each major modification
-Modification = "with LoRA fixed" # need more epochs
-Version = "V4.1"
+Modification = "with LoRA 100 epochs"
+Version = "V4.2"
 log_test = False
