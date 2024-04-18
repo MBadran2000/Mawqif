@@ -35,7 +35,7 @@ from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeft
 
 class TweetPredictor(pl.LightningModule):
 
-  def __init__(self, n_classes: list = 3, steps_per_epoch=None, class_weights=None ,config = None): #n_epochs=None,selectedModel=None,class_weights= None, weight_decay=0, lr = 2e-5, use_PEFT = 0):
+  def __init__(self, n_classes: list = 3, steps_per_epoch=None, class_weights=None ,config = None): 
     super().__init__()
 
     self.bert = AutoModel.from_pretrained(config['selectedModel'], return_dict=True)

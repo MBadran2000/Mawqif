@@ -55,7 +55,7 @@ if __name__ == '__main__':
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
     # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
-    # model = AutoModel.from_pretrained(config.selectedModel)
+    model = AutoModel.from_pretrained(config.selectedModel)
 
     train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
 
