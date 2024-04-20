@@ -44,6 +44,8 @@ def predict(text, model, tokenizer):
   )
 
   _, prediction_prop = model(encoding["input_ids"], encoding["attention_mask"])
+  if isinstance(prediction_prop, dict):
+      prediction_prop = prediction_prop['logits']
   prediction_prop = prediction_prop.detach()
   print("prediction_prop: ",prediction_prop)
   prediction = torch.max(prediction_prop, dim=1)
@@ -59,9 +61,14 @@ def get_predictions(model, data_loader):
   for item in tqdm(data_loader):
 
     text = item["text"]
-    labels.append(item["labels"])
+    if "labels_no" in item.keys():
+      labels.append(item["labels_no"])
+    else:
+      labels.append(item["labels"])
 
     _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    if isinstance(output, dict):
+      output = output['logits']
     output = output.detach()
 
     _, preds = torch.max(output, dim=1)

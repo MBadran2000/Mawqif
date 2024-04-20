@@ -25,8 +25,8 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # model_name = "bert-base-arabertv02"
 
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
-N_EPOCHS = 40
-BATCH_SIZE = 32
+N_EPOCHS = 1#40
+BATCH_SIZE = 16#32
 
 WEIGHTED_LOSS = False
 WEIGHT_DECAY = 0.001
@@ -37,6 +37,6 @@ FREEZE_BERT = False
 DROPOUT = 0.1
 
 ### Modfiy the following after each major modification
-Modification = "None"
-Version = "V4.6"
+Modification = "test prompting"
+Version = "V5.1"
 log_test = False
