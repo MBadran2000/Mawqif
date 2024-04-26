@@ -25,6 +25,15 @@ from pylab import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
+def add_words_to_string(input_string, words_at_start, words_at_end):
+    words = input_string.split()
+    words = words_at_start + words
+    words.extend(words_at_end)
+    return ' '.join(words)
+
+def remove_english(text):
+    return re.sub(r'[a-zA-Z]', '', text) #v3.1
+    # return re.sub(r'[a-zA-Z@0-9]', '', text) #v3.2
 
 
 # pl.seed_everything(42)
@@ -42,19 +51,31 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
 
     df['stance'] = df['stance'].fillna(value="None")
 
+
+    ###remove english characters
+    df['text'] = df['text'].apply(remove_english)
+    test_df['text'] = test_df['text'].apply(remove_english)
+
     ### prompt
     mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
-    target = df['target'].copy()
-    target = target.apply(lambda x: mapping_t[x])
+    # target = df['target'].copy()
+    # target = target.apply(lambda x: mapping_t[x])
     # df['text']=df['text']+'. موقف الكاتب من' +target + 'هو'
-    test_df['text']='تغريدة :'+test_df['text']+' موقف الكاتب من' +target + ':هو'
+    # df['text']='تغريدة :'+df['text']+' موقف الكاتب من' +target + ':هو'
     # df['text']=df['text']+'.' +target 
-    target = test_df['target'].copy()
-    target = target.apply(lambda x: mapping_t[x])
+    # target = test_df['target'].copy()
+    # target = target.apply(lambda x: mapping_t[x])
     # test_df['text']=test_df['text']+'. موقف الكاتب من' +target + 'هو'
-    test_df['text']='تغريدة :'+test_df['text']+' موقف الكاتب من' +target + ':هو'
-    
+    # test_df['text']='تغريدة :'+test_df['text']+' موقف الكاتب من' +target + ':هو'
     # test_df['text']=test_df['text']+'.' +target 
+
+    df['target'] = df['target'].apply(lambda x: mapping_t[x])
+    # df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
+    df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
+
+    test_df['target'] = test_df['target'].apply(lambda x: mapping_t[x])
+    # test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
+    test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
 
 
     df=df.drop('target', axis=1)

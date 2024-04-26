@@ -131,3 +131,48 @@ def getPeftModel(model, use_PEFT):
   return model
 
 
+def get_labels_tokens(selectedModel):
+  tokenizer = AutoTokenizer.from_pretrained(selectedModel)
+  # if tokenizer.pad_token is None:
+  #     # tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+  #     tokenizer.pad_token = tokenizer.eos_token
+
+  labels_tokens = [0,0,0]
+
+  encoding_stance = tokenizer.encode_plus(
+        'حياد',
+        add_special_tokens=False,
+        max_length=10,
+        return_token_type_ids=False,
+        # padding="max_length",
+        truncation=True,
+        return_attention_mask=False, # to make sure each sequence is maximum of max length
+        return_tensors='pt', #return it as pytorch
+      )
+  labels_tokens[0]=encoding_stance['input_ids'][0][0].item()
+
+  encoding_stance = tokenizer.encode_plus(
+        'مع',
+        add_special_tokens=False,
+        max_length=10,
+        return_token_type_ids=False,
+        # padding="max_length",
+        truncation=True,
+        return_attention_mask=False, # to make sure each sequence is maximum of max length
+        return_tensors='pt', #return it as pytorch
+      )
+  labels_tokens[1]=encoding_stance['input_ids'][0][0].item()
+
+  encoding_stance = tokenizer.encode_plus(
+        'ضد',
+        add_special_tokens=False,
+        max_length=10,
+        return_token_type_ids=False,
+        # padding="max_length",
+        truncation=True,
+        return_attention_mask=False, # to make sure each sequence is maximum of max length
+        return_tensors='pt', #return it as pytorch
+      )
+  labels_tokens[2]=encoding_stance['input_ids'][0][0].item()
+  print("labels tokens: ",labels_tokens)
+  return labels_tokens

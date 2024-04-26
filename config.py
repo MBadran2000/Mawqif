@@ -21,11 +21,12 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-mix'
 # selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
 # selectedModel = 'moha/arabert_c19'
+# selectedModel = "aubmindlab/aragpt2-base"
 
 # model_name = "bert-base-arabertv02"
 
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
-N_EPOCHS = 1#40
+N_EPOCHS = 50#40
 BATCH_SIZE = 16#32
 
 WEIGHTED_LOSS = False
@@ -37,6 +38,6 @@ FREEZE_BERT = False
 DROPOUT = 0.1
 
 ### Modfiy the following after each major modification
-Modification = "test prompting"
-Version = "V5.1"
+Modification = "prompting task prompt v2 with removing english characters"#"prompting task prompt v2"
+Version = "V5.3"
 log_test = False

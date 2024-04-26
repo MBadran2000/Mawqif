@@ -29,6 +29,11 @@ from matplotlib import rc
 
 # pl.seed_everything(42)
 
+def remove_english(text):
+    return re.sub(r'[a-zA-Z]', '', text) #v3.1
+    # return re.sub(r'[a-zA-Z@0-9]', '', text) #v3.2
+
+
 def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False):
     df = pd.read_csv(TrainData_name)
     test_df = pd.read_csv(TestData_name)
@@ -39,6 +44,11 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     test_df = test_df[['ID','text','stance','target']]
 
     df['stance'] = df['stance'].fillna(value="None")
+
+
+    ###remove english characters
+    # df['text'] = df['text'].apply(remove_english)
+    # test_df['text'] = test_df['text'].apply(remove_english)
 
     ### prompt
     # mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}

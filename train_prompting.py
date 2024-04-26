@@ -56,6 +56,13 @@ if __name__ == '__main__':
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
     # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
+    print(tokenizer.pad_token)
+    if tokenizer.pad_token is None:
+      print("no pad token")
+      tokenizer.pad_token = tokenizer.eos_token
+      # tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+
+
     model = AutoModelForCausalLM.from_pretrained(config.selectedModel, return_dict=True)
 
     train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )

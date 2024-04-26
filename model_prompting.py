@@ -31,7 +31,7 @@ from pylab import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeftModel
+from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeftModel, get_labels_tokens
 
 
 class TweetPredictor(pl.LightningModule):
@@ -76,12 +76,14 @@ class TweetPredictor(pl.LightningModule):
     self.lr = config['LEARNING_RATE']
 
     self.bert = getPeftModel(self.bert,config['USE_PEFT'])
+    self.labels_tokens =get_labels_tokens(config['selectedModel'])
 
     
 
   
   def forward(self, input_ids, attention_mask, labels=None):
-    output = self.bert(input_ids, attention_mask=attention_mask)
+    # output = self.bert(input_ids, attention_mask=attention_mask)
+    output = self.bert(input_ids)
 
     # output = self.dropout(output.pooler_output)
     # output = self.classifier1(output)
@@ -100,29 +102,26 @@ class TweetPredictor(pl.LightningModule):
     # output = F.log_softmax(output, dim=1) # for focal or nllloss
 
     loss = 0
-    # batch_size = output['logits'].size(0)
-    # sentence_size = output['logits'].size(1)
-    # vocab_size = output['logits'].size(2)
+    batch_size = output['logits'].size(0)
+    sentence_size = output['logits'].size(1)
+    vocab_size = output['logits'].size(2)
 
     if labels is not None:
-      # print(labels)
-      # print(output)
       # print(labels.squeeze(1).shape,output['logits'].shape)
       # loss =  output.loss
       # softmax_prediction = F.softmax(output['logits'], dim=2)
-      batch_size = output['logits'].size(0)
-      logits = output['logits'].view(batch_size * 128, 64000)
-      gt = labels.view(batch_size * 128)
+      logits = output['logits'].view(batch_size * sentence_size, vocab_size)
+      gt = labels.view(batch_size * sentence_size)
       
       # print("aa",softmax_prediction.squeeze().shape, labels.squeeze().long().shape)
       loss = F.cross_entropy(logits, gt)
       # loss = self.criterion(softmax_prediction.squeeze(), labels.squeeze().long()) 
     # {'None': 59910, 'Favor': 354, 'Against': 1092}
 
-    word_indices = [59910, 354, 1092]
-    pred_reshaped = output['logits'].view(batch_size, 128, 64000)
+    # word_indices = [59910, 354, 1092]
+    pred_reshaped = output['logits'].view(batch_size, sentence_size, vocab_size)
     word_probs = []
-    for idx in word_indices:
+    for idx in self.labels_tokens:#word_indices:
         word_prob = pred_reshaped[:, 0, idx]
         word_probs.append(word_prob.unsqueeze(1))
 
