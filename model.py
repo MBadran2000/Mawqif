@@ -23,6 +23,7 @@ import torch.nn.functional as F
 import torch.nn.functional as F
 from peft import LoraConfig, TaskType, LoKrConfig, LoHaConfig, AdaLoraConfig
 from peft import get_peft_model
+from pytorch_metric_learning import losses
 
 # Visualisation
 import seaborn as sns
@@ -31,6 +32,15 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeftModel
+
+def get_constrastive_loss(constrastive_loss):
+  if constrastive_loss == 0:
+    print("Without using Constrastive Loss")
+    return None
+  elif constrastive_loss == 1:
+    print("Using Constrastive Loss NTXentLoss")
+    return losses.NTXentLoss()
+  return None
 
 
 
@@ -76,8 +86,7 @@ class TweetPredictor(pl.LightningModule):
     self.lr = config['LEARNING_RATE']
 
     self.bert = getPeftModel(self.bert,config['USE_PEFT'])
-
-    
+    self.contrastiveloss = get_constrastive_loss(config['CONTRASTIVE_LOSS'])
 
   
   def forward(self, input_ids, attention_mask, labels=None):
@@ -90,41 +99,50 @@ class TweetPredictor(pl.LightningModule):
     # output = self.dropout(output)
     # output = self.classifier3(output)  
 
+
+    output_pooler = output.pooler_output
     output = self.dropout(output.pooler_output)
     output = self.classifier(output) 
 
     # output = self.classifier(output.pooler_output) 
-
     output = self.softmax(output, dim=1)
     # output = torch.softmax(output, dim=1) # for cross entropy
     # output = F.log_softmax(output, dim=1) # for focal or nllloss
 
-    loss = 0
+    loss,con_loss = 0,0
     if labels is not None:
-        loss = self.criterion(output, labels) 
+      loss = self.criterion(output, labels) 
+      if not self.contrastiveloss is None:
+        con_loss = self.contrastiveloss(output_pooler, labels)
         
-    return loss, output
+    return loss, con_loss, output
 
 
   def training_step(self, batch, batch_idx):
     input_ids = batch["input_ids"]
     attention_mask = batch["attention_mask"]
     labels = batch["labels"]
-    loss, outputs = self(input_ids, attention_mask, labels)
+    loss, con_loss, outputs = self(input_ids, attention_mask, labels)
     self.log("train_loss", loss, prog_bar=True, logger=True)
+    if not self.contrastiveloss is None:
+      self.log("train_con_loss", con_loss, prog_bar=True, logger=True)
+
     
     lr = self.optimizers().param_groups[0]['lr']
-    self.log('lr_abs', lr, prog_bar=True, logger=True )#, on_step=False, on_epoch=True)#, on_step=True, on_epoch=False)
+    self.log('lr_abs', lr, prog_bar=False, logger=True )#, on_step=False, on_epoch=True)#, on_step=True, on_epoch=False)
 
-    return {"loss": loss, "predictions": outputs, "labels": labels}
+    return {"loss": loss+con_loss, "predictions": outputs, "labels": labels}
 
 
   def validation_step(self, batch, batch_idx):
     input_ids = batch["input_ids"]
     attention_mask = batch["attention_mask"]
     labels = batch["labels"]
-    loss, outputs = self(input_ids, attention_mask, labels)
+    loss, con_loss, outputs = self(input_ids, attention_mask, labels)
     self.log("val_loss", loss, prog_bar=True, logger=True)
+    # if not self.contrastiveloss is None: ## not suitable for batch_size = 1
+    #   self.log("val_cons_loss", con_loss, prog_bar=True, logger=True)
+    #   return loss+con_loss
     return loss
 
 
@@ -132,10 +150,12 @@ class TweetPredictor(pl.LightningModule):
     input_ids = batch["input_ids"]
     attention_mask = batch["attention_mask"]
     labels = batch["labels"]
-    loss, outputs = self(input_ids, attention_mask, labels)
+    loss, con_loss, outputs = self(input_ids, attention_mask, labels)
     self.log("test_loss", loss, prog_bar=True, logger=True)
+    # if not self.con_loss is None: ## not suitable for batch_size = 1
+    #   self.log("test_cons_loss", con_loss, prog_bar=True, logger=True)
+    #   return loss+con_loss
     return loss
-
 
   def configure_optimizers(self):
     # optimizer = AdamW(self.parameters(), lr=2e-5, weight_decay=self.weight_decay) 

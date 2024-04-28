@@ -66,7 +66,7 @@ def get_predictions(model, data_loader):
     else:
       labels.append(item["labels"])
 
-    _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    _, _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
     if isinstance(output, dict):
       output = output['logits']
     output = output.detach()

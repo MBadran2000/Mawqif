@@ -37,8 +37,9 @@ USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
 LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
 FREEZE_BERT = False
 DROPOUT = 0.1
+CONTRASTIVE_LOSS = 1 #0: None, 1:NTXentLoss
 
 ### Modfiy the following after each major modification
 Modification = "Contrastive Loss NTXentLoss"
-Version = "V7.0"
+Version = "V7.1"
 log_test = False
