@@ -18,6 +18,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
+from torch.utils.data import WeightedRandomSampler
 
 # Visualisation
 import seaborn as sns
@@ -151,7 +152,9 @@ class TweetDataModule(pl.LightningDataModule):
       tokenizer, 
       text_preprocessor=None,
       batch_size=8, ## This default value
-      token_len=128 ## This default value
+      token_len=128, ## This default value
+      class_weights= None, 
+      weighted_sampler = False
     ):
     super().__init__()
     self.batch_size = batch_size
@@ -161,6 +164,8 @@ class TweetDataModule(pl.LightningDataModule):
     self.tokenizer = tokenizer
     self.text_preprocessor = text_preprocessor
     self.token_len = token_len
+    self.class_weights = class_weights
+    self.weighted_sampler = weighted_sampler
 
   ## setup function for loading the train and test sets
   def setup(self, stage=None):
@@ -199,12 +204,23 @@ class TweetDataModule(pl.LightningDataModule):
     return self.test_dataset
 
   def train_dataloader(self):
+    sampler = None
+    shuffle=True, #########
+
+    if self.weighted_sampler: 
+      # print(self.train_dataset['labels'])
+      sample_weights = [self.class_weights[i['labels'].item()].item() for i in self.train_dataset]
+      # print('sample_weights',sample_weights[:5])
+      sampler = WeightedRandomSampler(weights=sample_weights,replacement = True,num_samples=len(self.train_dataset))
+      shuffle= False
     return DataLoader(
       self.train_dataset,
       batch_size=self.batch_size,
-      shuffle=True, #########
-      num_workers=os.cpu_count() # or num_workers=4 
+      shuffle=shuffle, #########
+      num_workers=os.cpu_count(), # or num_workers=4 
+      sampler = sampler,
     )
+
 
 
   def val_dataloader(self):
