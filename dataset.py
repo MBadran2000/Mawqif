@@ -35,9 +35,18 @@ def remove_english(text):
     # return re.sub(r'[a-zA-Z@0-9]', '', text) #v3.2
 
 
-def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False):
+
+
+def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False,arabert_prep = None):
     df = pd.read_csv(TrainData_name)
     test_df = pd.read_csv(TestData_name)
+    
+    if not arabert_prep is None:
+      print("applying arabert preprocess")
+      df['text'] = df['text'].apply(lambda text: arabert_prep.preprocess(text))
+      test_df['text'] = test_df['text'].apply(lambda text: arabert_prep.preprocess(text))
+
+
 
     df= df[df['target'] == selectedTarget]
     test_df= test_df[test_df['target'] == selectedTarget]
