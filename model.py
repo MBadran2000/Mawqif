@@ -33,13 +33,90 @@ from matplotlib import rc
 
 from utils.model_utils import FocalLoss, LabelSmoothingCrossEntropyLoss, getPeftModel
 
-def get_constrastive_loss(constrastive_loss):
+def get_constrastive_loss(constrastive_loss, config, bert,n_classes=3):
   if constrastive_loss == 0:
     print("Without using Constrastive Loss")
     return None
   elif constrastive_loss == 1:
     print("Using Constrastive Loss NTXentLoss")
     return losses.NTXentLoss()
+  elif constrastive_loss == 2:
+    print("Using Constrastive Loss AngularLoss")
+    return losses.AngularLoss()
+  elif constrastive_loss == 3:    
+    print("Using Constrastive Loss ArcFaceLoss")
+    return losses.ArcFaceLoss(n_classes, bert.config.hidden_size)
+  elif constrastive_loss == 4:    
+    print("Using Constrastive Loss CircleLoss")
+    return losses.CircleLoss()
+  elif constrastive_loss == 5:    
+    print("Using Constrastive Loss ContrastiveLoss")
+    return losses.ContrastiveLoss()
+  elif constrastive_loss == 6:    
+    print("Using Constrastive Loss CosFaceLoss")
+    return losses.CosFaceLoss(n_classes, bert.config.hidden_size)
+  
+  elif constrastive_loss == 7:    
+    print("Using Constrastive Loss DynamicSoftMarginLoss")
+    return losses.DynamicSoftMarginLoss()
+  elif constrastive_loss == 8:    
+    print("Using Constrastive Loss FastAPLoss")
+    return losses.FastAPLoss()
+  elif constrastive_loss == 9:    
+    print("Using Constrastive Loss GeneralizedLiftedStructureLoss")
+    return losses.GeneralizedLiftedStructureLoss()
+  elif constrastive_loss == 10:    
+    print("Using Constrastive Loss InstanceLoss")
+    return losses.InstanceLoss()
+  elif constrastive_loss == 11:    
+    print("Using Constrastive Loss HistogramLoss")
+    return losses.HistogramLoss()
+  elif constrastive_loss == 12:    
+    print("Using Constrastive Loss IntraPairVarianceLoss")
+    return losses.IntraPairVarianceLoss()
+  
+  elif constrastive_loss == 13:    
+    print("Using Constrastive Loss TripletMarginLoss")
+    return losses.TripletMarginLoss()
+  elif constrastive_loss == 14:    
+    print("Using Constrastive Loss TupletMarginLoss")
+    return losses.TupletMarginLoss()
+  elif constrastive_loss == 15:    
+    print("Using Constrastive Loss SoftTripleLoss")
+    return losses.SoftTripleLoss(n_classes, bert.config.hidden_size)
+  elif constrastive_loss == 16:    
+    print("Using Constrastive Loss SphereFaceLoss")
+    return losses.SphereFaceLoss(n_classes, bert.config.hidden_size)
+
+
+  elif constrastive_loss == 17:    
+    print("Using Constrastive Loss LiftedStructureLoss")
+    return losses.LiftedStructureLoss()
+  elif constrastive_loss == 18:    
+    print("Using Constrastive Loss MarginLoss")
+    return losses.MarginLoss()
+  elif constrastive_loss == 19:    
+    print("Using Constrastive Loss MultiSimilarityLoss")
+    return losses.MultiSimilarityLoss()
+  elif constrastive_loss == 20:    
+    print("Using Constrastive Loss NCALoss")
+    return losses.NCALoss()
+  elif constrastive_loss == 21:    
+    print("Using Constrastive Loss NormalizedSoftmaxLoss")
+    return losses.NormalizedSoftmaxLoss(n_classes, bert.config.hidden_size)
+  elif constrastive_loss == 22:    
+    print("Using Constrastive Loss PNPLoss")
+    return losses.PNPLoss()
+  elif constrastive_loss == 23:    
+    print("Using Constrastive Loss ProxyAnchorLoss")
+    return losses.ProxyAnchorLoss(n_classes, bert.config.hidden_size)
+  elif constrastive_loss == 24:    
+    print("Using Constrastive Loss ProxyNCALoss")
+    return losses.ProxyNCALoss(n_classes, bert.config.hidden_size)
+  elif constrastive_loss == 25:    
+    print("Using Constrastive Loss SignalToNoiseRatioContrastiveLoss")
+    return losses.SignalToNoiseRatioContrastiveLoss()
+
   return None
 
 
@@ -86,7 +163,9 @@ class TweetPredictor(pl.LightningModule):
     self.lr = config['LEARNING_RATE']
 
     self.bert = getPeftModel(self.bert,config['USE_PEFT'])
-    self.contrastiveloss = get_constrastive_loss(config['CONTRASTIVE_LOSS'])
+    self.contrastiveloss = get_constrastive_loss(config['CONTRASTIVE_LOSS'], config, self.bert,n_classes=n_classes)
+    self.constrastivelosslambda = config['CONTRASTIVE_LOSS_LAMBDA']
+    print("constrastive loss lambda: ",self.constrastivelosslambda)
 
   
   def forward(self, input_ids, attention_mask, labels=None):
@@ -113,7 +192,7 @@ class TweetPredictor(pl.LightningModule):
     if labels is not None:
       loss = self.criterion(output, labels) 
       if not self.contrastiveloss is None:
-        con_loss = self.contrastiveloss(output_pooler, labels)
+        con_loss = self.contrastiveloss(output_pooler, labels)*self.constrastivelosslambda
         
     return loss, con_loss, output
 

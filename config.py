@@ -30,17 +30,23 @@ N_EPOCHS = 50#40
 BATCH_SIZE = 32#32
 
 WEIGHTED_LOSS = False
-WEIGHTED_SAMPLER = False
+WEIGHTED_SAMPLER = True
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
 LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
 FREEZE_BERT = False
 DROPOUT = 0.1
-CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss
+CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
+#7:DynamicSoftMarginLoss, 8:FastAPLoss, 9:GeneralizedLiftedStructureLoss, 10:InstanceLoss, 11:HistogramLoss. 12:IntraPairVarianceLoss
+#13:TripletMarginLoss, 14:TupletMarginLoss, 15:SoftTripleLoss, 16:SphereFaceLoss
+# 17:LiftedStructureLoss, 18:MarginLoss, 19:MultiSimilarityLoss, 20:NCALoss, 21:NormalizedSoftmaxLoss
+# 22:PNPLoss, 23:ProxyAnchorLoss, 24:ProxyNCALoss, 25:SignalToNoiseRatioContrastiveLoss
+CONTRASTIVE_LOSS_LAMBDA = 1
 USE_ARABERT_PRE = False
 
 ### Modfiy the following after each major modification
-Modification = "arabert preprocess"#"Contrastive Loss NTXentLoss"
-Version = "V3.3"
+Modification = "Contrastive Loss with weighted random sampler"
+Version = "V8.0"
 log_test = False
+

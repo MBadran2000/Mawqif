@@ -12,3 +12,6 @@ wrong_checkpoints/
 .gitignore
 test_prompting.py
 test_prompting2.py
+train_seq_run.py
+*.txt
+*-lexical
