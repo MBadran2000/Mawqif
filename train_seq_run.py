@@ -55,8 +55,10 @@ def run():
 
   if config.USE_NLPAUG:
     # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
-    nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
+    # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
     # nlp_aug = naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    print(nlp_aug)
   else:
     nlp_aug = None
 
@@ -154,10 +156,10 @@ def run():
 
 if __name__ == '__main__': 
   print(config.NLPAUG_PROB)
-  for i in range(1,5): 
-      config.NLPAUG_PROB = i/10.0
-      config.Version = "V10.2"+str(i)
-      print(config.NLPAUG_PROB, config.Version)
+  for i in range(1,2): 
+      # config.NLPAUG_PROB = i/10.0
+      # config.Version = "V10.5"+str(i)
+      print(config.Version)
       run()
       # try:
       #   config.NLPAUG_PROB = i/10.0

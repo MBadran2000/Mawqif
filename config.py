@@ -30,27 +30,27 @@ N_EPOCHS = 50#40
 BATCH_SIZE = 32#32
 
 WEIGHTED_LOSS = False
-WEIGHTED_SAMPLER = False
+WEIGHTED_SAMPLER = True
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
 LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
 FREEZE_BERT = False
 DROPOUT = 0.1
-CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
+CONTRASTIVE_LOSS = 21 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
 #7:DynamicSoftMarginLoss, 8:FastAPLoss, 9:GeneralizedLiftedStructureLoss, 10:InstanceLoss, 11:HistogramLoss. 12:IntraPairVarianceLoss
 #13:TripletMarginLoss, 14:TupletMarginLoss, 15:SoftTripleLoss, 16:SphereFaceLoss
 # 17:LiftedStructureLoss, 18:MarginLoss, 19:MultiSimilarityLoss, 20:NCALoss, 21:NormalizedSoftmaxLoss
 # 22:PNPLoss, 23:ProxyAnchorLoss, 24:ProxyNCALoss, 25:SignalToNoiseRatioContrastiveLoss
 CONTRASTIVE_LOSS_LAMBDA = 1
-USE_ARABERT_PRE = False
+USE_ARABERT_PRE = True
 
 USE_NLPAUG = True
 NLPAUG_PROB = 0.1
 
 ### Modfiy the following after each major modification
-Modification = "NLP Augmentation delete"
-Version = "V10.2" 
+Modification = "Contrastive Loss NormalizedSoftmaxLoss, NLP Augmentation delete and Synonm and weighted sampler with arabert preprocessor"
+Version = "V10.621" 
 ##0.0 Augmentation Synonm s ## 0.1 Augmentation Synonm l ## 0.2 Augmentation delete  ## 0.3 Augmentation swap
-log_test = False
+log_test = True
 

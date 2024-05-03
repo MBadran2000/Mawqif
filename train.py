@@ -56,8 +56,10 @@ if __name__ == '__main__':
 
   if config.USE_NLPAUG:
     # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
-    nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
+    # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
     # nlp_aug = naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    print(nlp_aug)
   else:
     nlp_aug = None
 

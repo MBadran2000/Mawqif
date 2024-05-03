@@ -134,7 +134,8 @@ class TweetEmotionDataset(Dataset):
     text = data_row.text
     
     if self.nlp_aug is not None:
-      text = self.nlp_aug.augment(text)[0]
+      for aug in self.nlp_aug:
+        text = (aug).augment(text)[0]
     if self.text_preprocessor is not None:
       text = self.text_preprocessor.preprocess(text)
 
