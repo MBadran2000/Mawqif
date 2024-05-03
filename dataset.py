@@ -116,12 +116,14 @@ class TweetEmotionDataset(Dataset):
       data: pd.DataFrame, 
       tokenizer: AutoTokenizer,
       text_preprocessor=None,
-      max_token_len: int = 128   
+      max_token_len: int = 128,
+      nlp_aug = None
     ):
     self.data = data
     self.tokenizer = tokenizer
     self.text_preprocessor = text_preprocessor
     self.max_token_len = max_token_len
+    self.nlp_aug = nlp_aug
     
   def __len__(self):
     return len(self.data)
@@ -130,6 +132,9 @@ class TweetEmotionDataset(Dataset):
     data_row = self.data.iloc[index]
 
     text = data_row.text
+    
+    if self.nlp_aug is not None:
+      text = self.nlp_aug.augment(text)[0]
     if self.text_preprocessor is not None:
       text = self.text_preprocessor.preprocess(text)
 
@@ -163,7 +168,8 @@ class TweetDataModule(pl.LightningDataModule):
       batch_size=8, ## This default value
       token_len=128, ## This default value
       class_weights= None, 
-      weighted_sampler = False
+      weighted_sampler = False,
+      nlp_aug = None
     ):
     super().__init__()
     self.batch_size = batch_size
@@ -175,6 +181,7 @@ class TweetDataModule(pl.LightningDataModule):
     self.token_len = token_len
     self.class_weights = class_weights
     self.weighted_sampler = weighted_sampler
+    self.nlp_aug = nlp_aug
 
   ## setup function for loading the train and test sets
   def setup(self, stage=None):
@@ -183,7 +190,8 @@ class TweetDataModule(pl.LightningDataModule):
       self.tokenizer,
       #self.label_columns,
       self.text_preprocessor,
-      self.token_len
+      self.token_len,
+      nlp_aug = self.nlp_aug
     )
     assert len(self.train_dataset) == len(self.train_df), "data missing, check TweetEmotionDataset"
 

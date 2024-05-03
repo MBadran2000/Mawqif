@@ -30,7 +30,7 @@ N_EPOCHS = 50#40
 BATCH_SIZE = 32#32
 
 WEIGHTED_LOSS = False
-WEIGHTED_SAMPLER = True
+WEIGHTED_SAMPLER = False
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
@@ -45,8 +45,12 @@ CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:Cir
 CONTRASTIVE_LOSS_LAMBDA = 1
 USE_ARABERT_PRE = False
 
+USE_NLPAUG = True
+NLPAUG_PROB = 0.1
+
 ### Modfiy the following after each major modification
-Modification = "Contrastive Loss with weighted random sampler"
-Version = "V8.0"
+Modification = "NLP Augmentation delete"
+Version = "V10.2" 
+##0.0 Augmentation Synonm s ## 0.1 Augmentation Synonm l ## 0.2 Augmentation delete  ## 0.3 Augmentation swap
 log_test = False
 

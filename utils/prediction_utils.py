@@ -85,3 +85,30 @@ def get_predictions(model, data_loader):
 
   return texts, predictions, prediction_probs, labels
 
+# def get_predictions_parrell(model, data_loader):
+#   texts = []
+#   predictions = []
+#   prediction_probs = []
+#   labels = []
+#   for batch in tqdm(data_loader):
+#       # print(batch)
+#       texts.extend(batch["text"])  # assuming "text" is a list in batch
+#       if "labels_no" in batch.keys():
+#           labels.extend(batch["labels_no"])
+#       else:
+#           labels.extend(batch["labels"])
+
+#       with torch.no_grad():
+#           outputs = model(batch["input_ids"], batch["attention_mask"])
+#           # print(outputs.shape)
+#           if isinstance(output, dict):
+#             output = output['logits']
+#           output = output.detach()
+
+#           _, preds = torch.max(logits, dim=1)
+#           probs = F.softmax(logits, dim=1)
+
+#       predictions.extend(preds.cpu().tolist())
+#       prediction_probs.extend(probs.cpu().tolist())
+
+#   return texts, predictions, prediction_probs, labels

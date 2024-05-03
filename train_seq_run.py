@@ -48,11 +48,10 @@ from utils.MyStanceEval import log_StanceEval
 
 pl.seed_everything(42)
 
-if __name__ == '__main__': 
+def run(): 
   os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
-  print(config_dict)
 
   if config.USE_NLPAUG:
     # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
@@ -135,20 +134,36 @@ if __name__ == '__main__':
     
     del trained_model, model, data_module
     
-    # exit()
-if len(config.selectedTarget) == 3:
-  Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
-  # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
-  logger = CometLogger(
-      experiment_name=Ex_name ,
-      api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
-      workspace='mbadran2000',  # Optional
-      #  save_dir='lightning_logs',  # Optional
-      project_name='Mawqif',  # Optional
-  )    
-  log_StanceEval(Ex_name,logger,"val")
-  if config.log_test:
-    log_StanceEval(Ex_name,logger,"test")
+      # exit()
+  if len(config.selectedTarget) == 3:
+    Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
+    # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
+    logger = CometLogger(
+        experiment_name=Ex_name ,
+        api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
+        workspace='mbadran2000',  # Optional
+        #  save_dir='lightning_logs',  # Optional
+        project_name='Mawqif',  # Optional
+    )    
+    log_StanceEval(Ex_name,logger,"val")
+    if config.log_test:
+      log_StanceEval(Ex_name,logger,"test")
 
 
 
+
+if __name__ == '__main__': 
+  print(config.NLPAUG_PROB)
+  for i in range(1,5): 
+      config.NLPAUG_PROB = i/10.0
+      config.Version = "V10.2"+str(i)
+      print(config.NLPAUG_PROB, config.Version)
+      run()
+      # try:
+      #   config.NLPAUG_PROB = i/10.0
+      #   config.Version = "V10.0"+str(i)
+      #   print(config.NLPAUG_PROB, config.Version)
+      #   run()
+      #   print("completed ",str(i))
+      # except:
+      #   print("Something went wrong ", str(i))
