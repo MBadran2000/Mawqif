@@ -65,7 +65,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     # test_df['text'] = test_df['text'].apply(remove_english)
 
     ### prompt
-    # mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
+    mapping_t = { 'Covid Vaccine': ' تطعيم كورونا ', 'Women empowerment': ' تمكين المرأة ', 'Digital Transformation': ' التحول الرقمي '}
     # target = df['target'].copy()
     # target = target.apply(lambda x: mapping_t[x])
     # df['text']=df['text']+'. موقف الكاتب من' +target + 'هو'
@@ -75,13 +75,15 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     # test_df['text']=test_df['text']+'. موقف الكاتب من' +target + 'هو'
     # # test_df['text']=test_df['text']+'.' +target 
 
-    # df['target'] = df['target'].apply(lambda x: mapping_t[x])
-    # # df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
-    # df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
+    df['target'] = df['target'].apply(lambda x: mapping_t[x])
+    # df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
+    df['text'] = df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
+    # df['text'] = df.apply(lambda row: add_words_to_string(row['text'],  [' . ' ,row['target']]), axis=1)#v0
 
-    # test_df['target'] = test_df['target'].apply(lambda x: mapping_t[x])
-    # # test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
-    # test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
+    test_df['target'] = test_df['target'].apply(lambda x: mapping_t[x])
+    # test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف الكاتب من' ,row['target'] , ':هو']), axis=1)#v1
+    test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], ['تغريدة :'], [' موقف التغريدة من' ,row['target'], 'هو :']), axis=1)#v2
+    # test_df['text'] = test_df.apply(lambda row: add_words_to_string(row['text'], [' . ' ,row['target']]), axis=1)#v0
 
     df=df.drop('target', axis=1)
     test_df=test_df.drop('target', axis=1)
@@ -111,7 +113,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     class_weights = 1.0 / class_frequencies
 
     ## decrease importance of None 
-    # class_weights[0] = (class_weights[1]+class_weights[2]) /2  #v1.1
+    class_weights[0] = (class_weights[1]+class_weights[2]) /2  #v1.1
     # class_weights[0] = min(class_weights[1],class_weights[2])   #v1.2
 
     # Normalize weights
@@ -147,12 +149,19 @@ class TweetEmotionDataset(Dataset):
     data_row = self.data.iloc[index]
 
     text = data_row.text
+    # file_path = "output.txt"
+    # with open(file_path, "a") as file:
+    #     file.write(text+'\n')
     
     if self.nlp_aug is not None:
       for aug in self.nlp_aug:
         text = (aug).augment(text)[0]
     if self.text_preprocessor is not None:
       text = self.text_preprocessor.preprocess(text)
+    
+    # with open(file_path, "a") as file:
+    #     file.write(text+'\n')
+
 
     encoding = self.tokenizer.encode_plus(
       text,

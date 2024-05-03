@@ -51,8 +51,8 @@ USE_NLPAUG = True
 NLPAUG_PROB = 0.1
 
 ### Modfiy the following after each major modification
-Modification = "Multi Target, Contrastive Loss NormalizedSoftmaxLoss, NLP Augmentation delete and Synonm and weighted sampler with arabert preprocessor"
-Version = "V2.121_mtarget" 
+Modification = "Multi Target, Contrastive Loss NormalizedSoftmaxLoss, NLP Augmentation delete and Synonm p=0.1 and weighted sampler with arabert preprocessor with prompt v0"
+Version = "V2.421_mtarget" 
 
 ##0.0 Augmentation Synonm s ## 0.1 Augmentation Synonm l ## 0.2 Augmentation delete  ## 0.3 Augmentation swap
 log_test = True

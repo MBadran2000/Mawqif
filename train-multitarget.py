@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
     # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
     # nlp_aug = [naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)]
-    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB,stopwords=['تطعيم','تطعيم','المرأة','تمكين','الرقمي','التحول','تغريدة',':','.','موقف','التغريدة','هو','من']),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB,stopwords=['تطعيم','تطعيم','المرأة','تمكين','الرقمي','التحول','تغريدة',':','.','موقف','التغريدة','هو','من'])]
     print(nlp_aug)
   else:
     nlp_aug = None
@@ -91,7 +91,7 @@ if __name__ == '__main__':
       train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
     print(len(train_df),len(val_df),len(test_df),class_weights)
 
-    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
+    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT,class_weights= class_weights, weighted_sampler = config.WEIGHTED_SAMPLER, nlp_aug = nlp_aug)
     data_module.setup()
 
     for batch in data_module.train_dataloader():
