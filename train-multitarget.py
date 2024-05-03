@@ -22,6 +22,13 @@ from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, 
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from pytorch_lightning.callbacks import EarlyStopping
 
+from peft import LoraConfig, TaskType
+from peft import get_peft_model
+
+import nlpaug.augmenter.char as nac
+import nlpaug.augmenter.word as naw
+import nlpaug.augmenter.sentence as nas
+
 # Visualisation
 import seaborn as sns
 from pylab import rcParams
@@ -47,20 +54,29 @@ if __name__ == '__main__':
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
   print(config_dict)
 
+  if config.USE_NLPAUG:
+    # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
+    # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
+    # nlp_aug = [naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)]
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    print(nlp_aug)
+  else:
+    nlp_aug = None
+
 
   for selectedTarget in config.selectedTarget:
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
-    # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
+    arabert_prep = ArabertPreprocessor(model_name=config.selectedModel) if config.USE_ARABERT_PRE else None
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
-    if selectedTarget == 'All':
-        train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,'Covid Vaccine',config.WEIGHTED_LOSS )
-        for s in [  'Women empowerment','Digital Transformation']: 
-          train_df1, val_df1, test_df1,class_weights1 = load_dataset(config.TrainData_name,config.TestData_name,s,config.WEIGHTED_LOSS )
-          print(len(train_df1),len(test_df1),len(val_df1),class_weights)
 
-          
+    if selectedTarget == 'All':
+        train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,'Covid Vaccine',config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep ) 
+        for s in [  'Women empowerment','Digital Transformation']: 
+          train_df1, val_df1, test_df1,class_weights1 = load_dataset(config.TrainData_name,config.TestData_name,s,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
+          print(len(train_df1),len(test_df1),len(val_df1),class_weights)
+        
           train_df = pd.concat([train_df, train_df1], ignore_index=True)
           val_df = pd.concat([val_df, val_df1], ignore_index=True)
           test_df = pd.concat([test_df, test_df1], ignore_index=True)
@@ -72,7 +88,7 @@ if __name__ == '__main__':
         print("****************")
 
     else:
-      train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
+      train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
     print(len(train_df),len(val_df),len(test_df),class_weights)
 
     data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
@@ -87,7 +103,7 @@ if __name__ == '__main__':
       # print(batch)
       break
 
-    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE, n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,class_weights=class_weights)
+    model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE,class_weights=class_weights, config = config_dict )
 
     
     logger = CometLogger(

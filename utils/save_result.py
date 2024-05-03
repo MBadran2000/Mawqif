@@ -47,3 +47,27 @@ def log_results(Ex_name, trained_model, logger, selectedTarget,dataset, val_or_t
         file_name=val_or_test+"-confusion-matrix.json"
     )
 
+
+def log_results_test(Ex_name, trained_model, logger, selectedTarget,dataset, val_or_test):
+    data_texts, data_pred, data_pred_probs, data_true = get_predictions(
+      trained_model,
+      dataset
+    )
+
+    class_names = ['None','Favor','Against']
+    report_val = classification_report(data_true, data_pred, target_names=class_names, zero_division=0, digits=4, output_dict=True)
+    save_pred_gt(Ex_name, selectedTarget, data_texts, data_pred, data_true, val_or_test)
+
+    for key, value in report_val.items():
+        if key == "accuracy":
+            logger.experiment.log_metric(selectedTarget+"_"+val_or_test+"_"+key, value)
+        else:
+            logger.experiment.log_metrics(value,prefix=selectedTarget+"_"+val_or_test+"_"+key)
+    logger.experiment.log_confusion_matrix(
+        data_true.tolist(),
+        data_pred.tolist(),
+        title=selectedTarget+val_or_test+" Confusion Matrix",
+        file_name=selectedTarget+val_or_test+"-confusion-matrix.json"
+    )
+
+

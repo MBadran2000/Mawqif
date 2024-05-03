@@ -21,13 +21,10 @@ from pytorch_lightning.loggers import CometLogger, TensorBoardLogger
 from torchmetrics.functional import accuracy, f1_score, roc, precision, recall, confusion_matrix
 from sklearn.metrics import classification_report, multilabel_confusion_matrix
 from pytorch_lightning.callbacks import EarlyStopping
+from transformers import AutoModelForCausalLM
 
 from peft import LoraConfig, TaskType
 from peft import get_peft_model
-
-import nlpaug.augmenter.char as nac
-import nlpaug.augmenter.word as naw
-import nlpaug.augmenter.sentence as nas
 
 # Visualisation
 import seaborn as sns
@@ -40,8 +37,8 @@ tqdm.pandas()
 from arabert.preprocess import ArabertPreprocessor
 
 import config
-from dataset import TweetEmotionDataset, TweetDataModule, load_dataset
-from model import TweetPredictor
+from dataset_prompting import TweetEmotionDataset, TweetDataModule, load_dataset
+from model_prompting import TweetPredictor
 from utils.prediction_utils import get_predictions, predict
 from utils.save_result import save_pred_gt, log_results
 from utils.MyStanceEval import log_StanceEval
@@ -54,28 +51,27 @@ if __name__ == '__main__':
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
   print(config_dict)
 
-  if config.USE_NLPAUG:
-    # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
-    # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
-    # nlp_aug = naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)
-    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
-    print(nlp_aug)
-  else:
-    nlp_aug = None
 
   for selectedTarget in config.selectedTarget:
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
-    arabert_prep = ArabertPreprocessor(model_name=config.selectedModel) if config.USE_ARABERT_PRE else None
+    # arabert_prep = ArabertPreprocessor(model_name=config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
-    model = AutoModel.from_pretrained(config.selectedModel)
+    print(tokenizer.pad_token)
+    if tokenizer.pad_token is None:
+      print("no pad token")
+      tokenizer.pad_token = tokenizer.eos_token
+      # tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
-    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
 
-    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT,class_weights= class_weights, weighted_sampler = config.WEIGHTED_SAMPLER, nlp_aug = nlp_aug)
+    model = AutoModelForCausalLM.from_pretrained(config.selectedModel, return_dict=True)
+
+    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS )
+
+    data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
     data_module.setup()
 
     for batch in data_module.train_dataloader():
-      assert len(batch) == 4
+      assert len(batch) == 5
       assert batch["input_ids"].shape == batch["attention_mask"].shape
       assert batch["input_ids"].shape[0] == config.BATCH_SIZE
       assert batch["input_ids"].shape[1] == config.MAX_TOKEN_COUNT
@@ -123,7 +119,7 @@ if __name__ == '__main__':
 
 
     trainer.fit(model, data_module)
-    trainer.test(datamodule=data_module)
+    # trainer.test(datamodule=data_module)
 
 
 

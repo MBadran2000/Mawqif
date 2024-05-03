@@ -10,3 +10,6 @@ t.py
 checkpoints_test.py
 wrong_checkpoints/
 .gitignore
+test_prompting.py
+test_prompting2.py
+*-lexical
