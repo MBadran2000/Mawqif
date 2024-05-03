@@ -144,7 +144,11 @@ class TweetPredictor(pl.LightningModule):
     self.n_epochs = config['N_EPOCHS']
 
     if config['LOSS']==0:
-      self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+      if config['WEIGHTED_LOSS']:
+        self.criterion = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+        print("using weighted loss")
+      else:
+        self.criterion = nn.CrossEntropyLoss() # for multi-class
       self.softmax = torch.softmax
       print("loss: CrossEntropyLoss" )
     elif config['LOSS']==1:

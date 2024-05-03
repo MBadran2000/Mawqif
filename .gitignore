@@ -13,3 +13,5 @@ wrong_checkpoints/
 test_prompting.py
 test_prompting2.py
 *-lexical
+output.txt
+output2.txt
