@@ -39,7 +39,7 @@ USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
 LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
 FREEZE_BERT = False
 DROPOUT = 0.1
-CONTRASTIVE_LOSS = 21 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
+CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
 #7:DynamicSoftMarginLoss, 8:FastAPLoss, 9:GeneralizedLiftedStructureLoss, 10:InstanceLoss, 11:HistogramLoss. 12:IntraPairVarianceLoss
 #13:TripletMarginLoss, 14:TupletMarginLoss, 15:SoftTripleLoss, 16:SphereFaceLoss
 # 17:LiftedStructureLoss, 18:MarginLoss, 19:MultiSimilarityLoss, 20:NCALoss, 21:NormalizedSoftmaxLoss
@@ -53,8 +53,8 @@ taskWeights = [0.6,0.3,0.1]
 # taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
-Modification = "multi-task parallel weight sampler v0 constrastive loss NormalizedSoftmaxLoss"
-Version = "V3.021_multitask"
+Modification = "multi-task parallel v3.1 weight sampler v0"
+Version = "V3.10_multitask"
 
 log_test = True
 

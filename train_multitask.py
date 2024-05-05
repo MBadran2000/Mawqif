@@ -101,7 +101,7 @@ if __name__ == '__main__':
         monitor="val_loss",
         mode="min"
     )
-    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=6) ##5
 
     trainer = pl.Trainer(
       logger=logger,

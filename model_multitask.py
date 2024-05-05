@@ -126,10 +126,12 @@ class TweetPredictor(pl.LightningModule):
   def __init__(self, n_classes: list = 3, steps_per_epoch=None, class_weights=None ,config = None): 
     super().__init__()
     self.bert = AutoModel.from_pretrained(config['selectedModel'], return_dict=True)
-    self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
+    # self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 1)####2 classes
-    self.classifierSTA_final = nn.Linear(n_classes+n_classes+1,3)
+    # self.classifierSTA_final = nn.Linear(n_classes+n_classes+1,3)#v3.0
+    self.classifierSTA_final = nn.Linear(self.bert.config.hidden_size+n_classes+1,3)#v3.1
+
     self.taskWeights = config['taskWeights']
     # self.taskWeights = [1,1,1]
     # self.lossSTA=0
@@ -188,7 +190,8 @@ class TweetPredictor(pl.LightningModule):
     output = self.dropout(output.pooler_output)
 
 
-    outputSTA1 = self.classifierSTA(output) 
+    # outputSTA1 = self.classifierSTA(output) #v3.0
+    outputSTA1 = output #v3.1
     # outputSTA = torch.softmax(outputSTA1, dim=1) # for multi-class  
 
     outputSENT1 = self.classifierSENT(output) 
