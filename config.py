@@ -24,15 +24,17 @@ selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
 # selectedModel = 'moha/arabert_c19'
 # selectedModel = "aubmindlab/aragpt2-base"
 
+# selectedModels = {'Covid Vaccine':"aubmindlab/bert-base-arabertv02-twitter",'Covid Vaccine':'moha/arabert_c19', 'Digital Transformation':"aubmindlab/bert-base-arabertv02-twitter"}
+
 # model_name = "bert-base-arabertv02"
 
 MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
 
-N_EPOCHS = 50#40
+N_EPOCHS = 60#40
 BATCH_SIZE = 32#32
 
-WEIGHTED_LOSS = False
-WEIGHTED_SAMPLER = True
+WEIGHTED_LOSS = True
+WEIGHTED_SAMPLER = False
 WEIGHT_DECAY = 0.001
 LEARNING_RATE = 2e-5
 USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
@@ -49,12 +51,12 @@ USE_ARABERT_PRE = True
 
 USE_NLPAUG = True
 NLPAUG_PROB = 0.1
-taskWeights = [0.6,0.3,0.1]
+taskWeights = [0.7,0.2,0.1]
 # taskWeights = "Hierarchical Weighting"
 
 ### Modfiy the following after each major modification
-Modification = "multi-task parallel v3.1 weight sampler v0"
-Version = "V3.10_multitask"
+Modification = "multi-task parallel (Weighted Loss for all tasks)"
+Version = "V100.0"
 
 log_test = True
 

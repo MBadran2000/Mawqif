@@ -126,11 +126,11 @@ class TweetPredictor(pl.LightningModule):
   def __init__(self, n_classes: list = 3, steps_per_epoch=None, class_weights=None ,config = None): 
     super().__init__()
     self.bert = AutoModel.from_pretrained(config['selectedModel'], return_dict=True)
-    # self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
+    self.classifierSTA = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSENT = nn.Linear(self.bert.config.hidden_size, n_classes)
     self.classifierSAR = nn.Linear(self.bert.config.hidden_size, 1)####2 classes
-    # self.classifierSTA_final = nn.Linear(n_classes+n_classes+1,3)#v3.0
-    self.classifierSTA_final = nn.Linear(self.bert.config.hidden_size+n_classes+1,3)#v3.1
+    self.classifierSTA_final = nn.Linear(n_classes+n_classes+1,3)#v3.0
+    # self.classifierSTA_final = nn.Linear(self.bert.config.hidden_size+n_classes+1,3)#v3.1
 
     self.taskWeights = config['taskWeights']
     # self.taskWeights = [1,1,1]
@@ -152,7 +152,7 @@ class TweetPredictor(pl.LightningModule):
 
     if config['LOSS']==0:
       if config['WEIGHTED_LOSS']:
-        self.criterionSTA = nn.CrossEntropyLoss(weight=class_weights) # for multi-class
+        self.criterionSTA = nn.CrossEntropyLoss(weight=class_weights['STA']) # for multi-class
         print("using weighted loss")
       else:
         self.criterionSTA = nn.CrossEntropyLoss() # for multi-class
@@ -163,12 +163,25 @@ class TweetPredictor(pl.LightningModule):
       self.softmax = F.log_softmax
       print("loss: LabelSmoothingCrossEntropyLoss" )
     elif config['LOSS']==2:
-      self.criterion = FocalLoss(gamma=4, weight=class_weights)
+      self.criterion = FocalLoss(gamma=4, weight=class_weights['STA'])
       self.softmax = F.log_softmax
       print("loss: FocalLoss" )
     
-    self.criterionSENT = nn.CrossEntropyLoss() # for multi-class
-    self.criterionSAR = nn.BCELoss() # for multi-class
+    # self.criterionSENT = nn.CrossEntropyLoss() # for multi-class
+    # self.criterionSAR = nn.BCELoss() # for multi-class
+
+    if config['WEIGHTED_LOSS']:
+      self.criterionSENT = nn.CrossEntropyLoss(weight=class_weights['SENT']) # for multi-class
+      print("using weighted loss")
+    else:
+      self.criterionSENT = nn.CrossEntropyLoss() # for multi-class
+
+    if config['WEIGHTED_LOSS']:
+      self.criterionSAR = nn.BCELoss(weight=class_weights['SAR'][0]) # for multi-class
+      print("using weighted loss")
+    else:
+      self.criterionSAR = nn.BCELoss() # for multi-class
+
 
     self.save_hyperparameters()
 
@@ -190,8 +203,8 @@ class TweetPredictor(pl.LightningModule):
     output = self.dropout(output.pooler_output)
 
 
-    # outputSTA1 = self.classifierSTA(output) #v3.0
-    outputSTA1 = output #v3.1
+    outputSTA1 = self.classifierSTA(output) #v3.0
+    # outputSTA1 = output #v3.1
     # outputSTA = torch.softmax(outputSTA1, dim=1) # for multi-class  
 
     outputSENT1 = self.classifierSENT(output) 

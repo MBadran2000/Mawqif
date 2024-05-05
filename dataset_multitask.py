@@ -96,11 +96,27 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     # class_weights[0] = min(class_weights[1],class_weights[2])   #v1.2
 
     # Normalize weights
-    class_weights = class_weights / class_weights.sum()
+    class_weights_STA = class_weights / class_weights.sum()
 
-    print("Class Weights:", class_weights)
 
-    return train_df, val_df, test_df,class_weights
+    targets = torch.tensor(np.array(train_df['sentiment']))
+    class_counts = torch.bincount(targets)
+    total_samples = class_counts.sum().float()
+    class_frequencies = class_counts / total_samples
+    class_weights = 1.0 / class_frequencies
+    class_weights_SENT = class_weights / class_weights.sum()
+
+    targets = torch.tensor(np.array(train_df['sarcasm']))
+    class_counts = torch.bincount(targets)
+    total_samples = class_counts.sum().float()
+    class_frequencies = class_counts / total_samples
+    class_weights = 1.0 / class_frequencies
+    class_weights_SAR = class_weights / class_weights.sum()
+
+
+    print("Class Weights:", class_weights_STA,class_weights_SENT,class_weights_SAR)
+
+    return train_df, val_df, test_df,{"STA":class_weights_STA,"SENT":class_weights_SENT,"SAR":class_weights_SAR}
 
 
 class TweetEmotionDataset(Dataset):
@@ -223,7 +239,7 @@ class TweetDataModule(pl.LightningDataModule):
 
     if self.weighted_sampler: 
       # print(self.train_dataset['labels'])
-      sample_weights = [self.class_weights[i['labels']['STA'].item()].item() for i in self.train_dataset]
+      sample_weights = [self.class_weights['STA'][i['labels']['STA'].item()].item() for i in self.train_dataset]
       # print('sample_weights',sample_weights[:5])
       sampler = WeightedRandomSampler(weights=sample_weights,replacement = True,num_samples=len(self.train_dataset))
       shuffle= False
