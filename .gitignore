@@ -7,3 +7,11 @@ __pycache__/
 Fine_tuning_for_stance_classification.ipynb
 t.ipynb
 t.py
+checkpoints_test.py
+wrong_checkpoints/
+.gitignore
+test_prompting.py
+test_prompting2.py
+*-lexical
+output.txt
+output2.txt

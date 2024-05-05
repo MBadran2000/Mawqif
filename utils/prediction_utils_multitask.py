@@ -59,9 +59,15 @@ def get_predictions(model, data_loader):
   for item in tqdm(data_loader):
 
     text = item["text"]
-    labels.append(item["labels"]['STA'])
+    if "labels_no" in item.keys():
+      labels.append(item["labels_no"]['STA'])
+    else:
+      labels.append(item["labels"]['STA'])
+    
 
-    _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    _, _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    if isinstance(output, dict):
+      output = output['logits']
     output = output.detach()
 
     _, preds = torch.max(output, dim=1)

@@ -57,11 +57,12 @@ if __name__ == '__main__':
   if config.USE_NLPAUG:
     # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
     # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
-    # nlp_aug = naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)
-    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    # nlp_aug = [naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)]
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB,stopwords=['تطعيم','تطعيم','المرأة','تمكين','الرقمي','التحول','تغريدة',':','.','موقف','التغريدة','هو','من']),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB,stopwords=['تطعيم','تطعيم','المرأة','تمكين','الرقمي','التحول','تغريدة',':','.','موقف','التغريدة','هو','من'])]
     print(nlp_aug)
   else:
     nlp_aug = None
+
 
   for selectedTarget in config.selectedTarget:
     Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
@@ -69,7 +70,26 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
-    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
+
+    if selectedTarget == 'All':
+        train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,'Covid Vaccine',config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep ) 
+        for s in [  'Women empowerment','Digital Transformation']: 
+          train_df1, val_df1, test_df1,class_weights1 = load_dataset(config.TrainData_name,config.TestData_name,s,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
+          print(len(train_df1),len(test_df1),len(val_df1),class_weights)
+        
+          train_df = pd.concat([train_df, train_df1], ignore_index=True)
+          val_df = pd.concat([val_df, val_df1], ignore_index=True)
+          test_df = pd.concat([test_df, test_df1], ignore_index=True)
+          if not class_weights is None:
+            class_weights = class_weights + class_weights1
+          
+        if not class_weights is None:
+            class_weights = class_weights/3
+        print("****************")
+
+    else:
+      train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
+    print(len(train_df),len(val_df),len(test_df),class_weights)
 
     data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT,class_weights= class_weights, weighted_sampler = config.WEIGHTED_SAMPLER, nlp_aug = nlp_aug)
     data_module.setup()
@@ -83,9 +103,7 @@ if __name__ == '__main__':
       # print(batch)
       break
 
-
     model = TweetPredictor(n_classes=3, steps_per_epoch=len(train_df) // config.BATCH_SIZE,class_weights=class_weights, config = config_dict )
-    #n_epochs=config.N_EPOCHS,selectedModel =config.selectedModel,weight_decay = config.WEIGHT_DECAY, lr = config.LEARNING_RATE,use_PEFT = config.USE_PEFT)
 
     
     logger = CometLogger(
@@ -126,19 +144,26 @@ if __name__ == '__main__':
     trainer.test(datamodule=data_module)
 
 
-
     trained_model = model.load_from_checkpoint("checkpoints/"+Ex_name+"/best-checkpoint.ckpt")
     trained_model.freeze()
 
-    log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_val_dataset(), "val")
-
-    if config.log_test:
-      log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_test_dataset(), "test")
+    if selectedTarget == "All":
+      for s in [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']: 
+        train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,s,config.WEIGHTED_LOSS )
+        data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT)
+        data_module.setup()
+        log_results(Ex_name, trained_model, logger, s, data_module.get_val_dataset(), "val")
+        if config.log_test:
+          log_results(Ex_name, trained_model, logger, s, data_module.get_test_dataset(), "test")
+    else:
+      log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_val_dataset(), "val")
+      if config.log_test:
+        log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_test_dataset(), "test")
     
     del trained_model, model, data_module
     
     # exit()
-if len(config.selectedTarget) == 3:
+if len(config.selectedTarget) == 3 or config.selectedTarget[0] == "All":
   Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
   # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
   logger = CometLogger(
