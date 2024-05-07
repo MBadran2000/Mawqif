@@ -1,21 +1,3 @@
-
-
-<!-- To get Predictions
-Install dependencies in requirements.txt
-Installed models from this Link and put them in the final_checkpoints
-Download blind dataset and add it path in config.py "BlindTestData_name"
-Run ensemble_predicit.py
-
-
-For Training 
-Install dependencies in requirements.txt
-Change model's details config file and training and test datasets' path
-then you have more than 1 option
-Use train_multitask.py to train model with multitask approch
-Use train_multitarget.py to train model with multitarget approch
-Use train_multiprompting.py to train model as prompting task instead of classification
-Use train.py to train model a classification model without multitask nor multitarget -->
-
 ### Getting Predictions:
 
 1. **Install Dependencies:**  
