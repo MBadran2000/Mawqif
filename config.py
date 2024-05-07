@@ -5,33 +5,20 @@ TestData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
 BlindTestData_name = '/home/dr-nfs/m.badran/mawqif/Mawqif_AllTargets_Blind Test.csv'
 
 selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']
-# selectedTarget = ['All']
+# selectedTarget = ['All'] # for multi-target approch
 # selectedTarget = [ 'Covid Vaccine']
 
-#Ex_name = 'MARBERT_'+selectedTarget+'_Stance'
-#Ex_name = 'AraBERT_'+selectedTarget+'_Stance'
-#Ex_name = 'camelbert-da_'+selectedTarget+'_Stance'
-# Ex_name = 'AraBERT-twitter_'+selectedTarget+'_Stance'
 
-# selectedModel = "UBC-NLP/MARBERT"
-# selectedModel =  "aubmindlab/bert-base-arabertv02"
-# selectedModel = "CAMeL-Lab/bert-base-arabic-camelbert-da"
 # selectedModel = "aubmindlab/bert-base-arabertv02-twitter"
-# selectedModel = 'aubmindlab/bert-large-arabertv02-twitter' ## no enough memory 
-# selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-msa-did-madar-twitter5'
-# selectedModel = 'CAMeL-Lab/bert-base-arabic-camelbert-mix'
-# selectedModel =  'CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment'
-# selectedModel = 'moha/arabert_c19'
-# selectedModel = "aubmindlab/aragpt2-base"
+
 
 selectedModels = {'Women empowerment':"aubmindlab/bert-base-arabertv02-twitter",'Covid Vaccine':'moha/arabert_c19', 'Digital Transformation':"aubmindlab/bert-base-arabertv02-twitter"}
 
-# model_name = "bert-base-arabertv02"
 
-MAX_TOKEN_COUNT = 128  ## Selection is based on the dataset graph 
+MAX_TOKEN_COUNT = 128   
 
-N_EPOCHS = 60#40
-BATCH_SIZE = 32#32
+N_EPOCHS = 60
+BATCH_SIZE = 32
 
 WEIGHTED_LOSS = True
 WEIGHTED_SAMPLER = False
@@ -52,15 +39,9 @@ USE_ARABERT_PRE = False
 USE_NLPAUG = False
 NLPAUG_PROB = 0.1
 taskWeights = [0.7,0.2,0.1]
-# taskWeights = "Hierarchical Weighting"
 
-### Modfiy the following after each major modification
 Modification = "multi-task parallel (Weighted Loss for all tasks) without arabert preprocessor and without nlp aug"
 Version = "V104." +str(CONTRASTIVE_LOSS)
-#101 multi-task parallel (Weighted Loss for all tasks) arabert of each model alone
-#102 "multi-task parallel (Weighted Loss for all tasks) without arabert preprocessor"
-#103 "multi-task parallel (Weighted Loss for all tasks) arabert of arabtwitter"
-#104 "multi-task parallel (Weighted Loss for all tasks) without arabert preprocessor and without nlp aug"
 
 log_test = True
 
