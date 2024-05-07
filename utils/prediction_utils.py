@@ -85,30 +85,29 @@ def get_predictions(model, data_loader):
 
   return texts, predictions, prediction_probs, labels
 
-# def get_predictions_parrell(model, data_loader):
-#   texts = []
-#   predictions = []
-#   prediction_probs = []
-#   labels = []
-#   for batch in tqdm(data_loader):
-#       # print(batch)
-#       texts.extend(batch["text"])  # assuming "text" is a list in batch
-#       if "labels_no" in batch.keys():
-#           labels.extend(batch["labels_no"])
-#       else:
-#           labels.extend(batch["labels"])
+def get_predictions_blind(model, data_loader):
+  texts = []
+  predictions = []
+  texts_id = []
+  for item in tqdm(data_loader):
 
-#       with torch.no_grad():
-#           outputs = model(batch["input_ids"], batch["attention_mask"])
-#           # print(outputs.shape)
-#           if isinstance(output, dict):
-#             output = output['logits']
-#           output = output.detach()
+    text = item["text"]
+    tweet_id = item["tweet_id"]
 
-#           _, preds = torch.max(logits, dim=1)
-#           probs = F.softmax(logits, dim=1)
+    _, _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
+    if isinstance(output, dict):
+      output = output['logits']
+    output = output.detach()
 
-#       predictions.extend(preds.cpu().tolist())
-#       prediction_probs.extend(probs.cpu().tolist())
+    _, preds = torch.max(output, dim=1)
+    probs = F.softmax(output, dim=1)
+  
+    texts.append(text) # we can use .append instead of .extend
+    predictions.extend(preds.detach())
+    texts_id.extend(tweet_id.detach())
 
-#   return texts, predictions, prediction_probs, labels
+
+  predictions = torch.stack(predictions).cpu()
+  texts_id = torch.stack(texts_id).cpu()
+
+  return texts, predictions, texts_id

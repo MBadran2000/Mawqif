@@ -40,7 +40,7 @@ def add_words_to_string(input_string, words_at_start, words_at_end):
     return ' '.join(words)
 
 
-def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False,arabert_prep = None):
+def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss = False,arabert_prep = None,random_state=42):
     df = pd.read_csv(TrainData_name)
     test_df = pd.read_csv(TestData_name)
 
@@ -75,7 +75,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     mapping = {'None': 0, 'Favor': 1, 'Against': 2}
     df['stance'] = df['stance'].apply(lambda x: mapping[x])
     test_df['stance'] = test_df['stance'].apply(lambda x: mapping[x])
-    train_df, val_df = train_test_split(df, test_size=0.18, stratify=df['stance'],random_state=42)
+    train_df, val_df = train_test_split(df, test_size=0.18, stratify=df['stance'],random_state=random_state)
     # train_df, val_df = train_test_split(df, test_size=0.05, stratify=df['stance'],random_state=42)
 
     print(train_df.head())
@@ -117,6 +117,7 @@ def load_dataset(TrainData_name,TestData_name,selectedTarget,Apply_Weight_loss =
     print("Class Weights:", class_weights_STA,class_weights_SENT,class_weights_SAR)
 
     return train_df, val_df, test_df,{"STA":class_weights_STA,"SENT":class_weights_SENT,"SAR":class_weights_SAR}
+
 
 
 class TweetEmotionDataset(Dataset):
@@ -257,3 +258,103 @@ class TweetDataModule(pl.LightningDataModule):
 
   def test_dataloader(self):
     return DataLoader(self.test_dataset, batch_size=1, num_workers=os.cpu_count()) # or num_workers=4 
+
+
+
+
+
+
+
+def load_blind_dataset(TestData_name,selectedTarget,Apply_Weight_loss = False,arabert_prep = None,random_state=42):
+    test_df = pd.read_csv(TestData_name)
+
+    if not arabert_prep is None:
+      print("applying arabert preprocess")
+      test_df['text'] = test_df['text'].apply(lambda text: arabert_prep.preprocess(text))
+
+    test_df= test_df[test_df['target'] == selectedTarget]
+    test_df = test_df[['ID','text']]
+
+
+    print(test_df.head())
+
+    return test_df
+
+
+class BlindTweetEmotionDataset(Dataset):
+
+  def __init__(
+      self, 
+      data: pd.DataFrame, 
+      tokenizer: AutoTokenizer,
+      text_preprocessor=None,
+      max_token_len: int = 128,
+    ):
+    self.data = data
+    self.tokenizer = tokenizer
+    self.text_preprocessor = text_preprocessor
+    self.max_token_len = max_token_len
+    
+  def __len__(self):
+    return len(self.data)
+
+  def __getitem__(self, index: int):
+    data_row = self.data.iloc[index]
+
+    text = data_row.text
+
+    if self.text_preprocessor is not None:
+      text = self.text_preprocessor.preprocess(text)
+
+    encoding = self.tokenizer.encode_plus(
+      text,
+      add_special_tokens=True,
+      max_length=self.max_token_len,
+      return_token_type_ids=False,
+      padding="max_length",
+      truncation=True,
+      return_attention_mask=True, # to make sure each sequence is maximum of max length
+      return_tensors='pt', #return it as pytorch
+    )
+
+    return dict(
+      text=text,
+      input_ids=encoding["input_ids"].flatten(), ##we use flatten to remove X dimension
+      attention_mask=encoding["attention_mask"].flatten(),
+      tweet_id = data_row.ID
+    )
+
+
+class BlindTweetDataModule(pl.LightningDataModule):
+  def __init__(
+      self, 
+      test_df,
+      tokenizer, 
+      text_preprocessor=None,
+      batch_size=8, ## This default value
+      token_len=128, ## This default value
+    ):
+    super().__init__()
+    self.batch_size = batch_size
+    self.test_df = test_df
+    self.tokenizer = tokenizer
+    self.text_preprocessor = text_preprocessor
+    self.token_len = token_len
+
+  ## setup function for loading the train and test sets
+  def setup(self, stage=None):
+    self.test_dataset = BlindTweetEmotionDataset(
+      self.test_df,
+      self.tokenizer,
+      self.text_preprocessor,
+      self.token_len
+    )
+    assert len(self.test_dataset) == len(self.test_df), "data missing, check TweetEmotionDataset"
+  
+  def get_test_dataset(self):
+    return self.test_dataset
+
+  def test_dataloader(self):
+    return DataLoader(self.test_dataset, batch_size=32, num_workers=os.cpu_count()) # or num_workers=4 
+
+

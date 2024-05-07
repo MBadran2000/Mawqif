@@ -39,37 +39,37 @@ tqdm.pandas()
 
 from arabert.preprocess import ArabertPreprocessor
 
-import config
 from dataset_multitask import TweetEmotionDataset, TweetDataModule, load_dataset
 from model_multitask import TweetPredictor
 from utils.prediction_utils_multitask import get_predictions, predict
 from utils.save_result_multitask import save_pred_gt, log_results
 from utils.MyStanceEval import log_StanceEval
 
+import config  
+
 pl.seed_everything(42)
 
-if __name__ == '__main__': 
+def run(nlp_aug=None):
   os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
   print(config_dict)
 
-  if config.USE_NLPAUG:
-    # nlp_aug = naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-l-lexical',aug_p=config.NLPAUG_PROB)
-    # nlp_aug = naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB)
-    # nlp_aug = naw.RandomWordAug(action='swap', aug_p=config.NLPAUG_PROB)
-    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
-    print(nlp_aug)
-  else:
-    nlp_aug = None
-
   for selectedTarget in config.selectedTarget:
-    Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
+    if not config.selectedModels is None:
+      config.selectedModel = config.selectedModels[selectedTarget]
+      config_dict['selectedModel']=config.selectedModels[selectedTarget]
+      print('selected model:',config.selectedModel)
+
+
+    # Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
+    Ex_name =  config.Version+"-"+selectedTarget.replace(" ","")
+
     arabert_prep = ArabertPreprocessor(model_name=config.selectedModel) if config.USE_ARABERT_PRE else None
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
 
-    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep )
+    train_df, val_df, test_df,class_weights = load_dataset(config.TrainData_name,config.TestData_name,selectedTarget,config.WEIGHTED_LOSS or config.WEIGHTED_SAMPLER, arabert_prep = arabert_prep,random_state=config.CONTRASTIVE_LOSS)
 
     data_module = TweetDataModule(train_df, val_df, test_df, tokenizer, batch_size=config.BATCH_SIZE, token_len=config.MAX_TOKEN_COUNT,class_weights= class_weights, weighted_sampler = config.WEIGHTED_SAMPLER, nlp_aug = nlp_aug)
     data_module.setup()
@@ -94,14 +94,14 @@ if __name__ == '__main__':
      project_name='Mawqif',  # Optional
      )
     checkpoint_callback = ModelCheckpoint(
-        dirpath="checkpoints/"+Ex_name,
+        dirpath="final_checkpoints/"+Ex_name,
         filename="best-checkpoint",
         save_top_k=1,
         verbose=True,
         monitor="val_loss",
         mode="min"
     )
-    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=7) ##5
+    early_stopping_callback = EarlyStopping(monitor='val_loss', patience=8) ##5
 
     trainer = pl.Trainer(
       logger=logger,
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
 
 
-    trained_model = model.load_from_checkpoint("checkpoints/"+Ex_name+"/best-checkpoint.ckpt")
+    trained_model = model.load_from_checkpoint("final_checkpoints/"+Ex_name+"/best-checkpoint.ckpt")
     trained_model.freeze()
 
     log_results(Ex_name, trained_model, logger, selectedTarget, data_module.get_val_dataset(), "val")
@@ -135,9 +135,10 @@ if __name__ == '__main__':
     
     del trained_model, model, data_module
     
-    # exit()
   if len(config.selectedTarget) == 3:
-    Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
+    Ex_name =  config.Version+"-Overall"
+
+    # Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
     # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
     logger = CometLogger(
         experiment_name=Ex_name ,
@@ -151,3 +152,10 @@ if __name__ == '__main__':
       log_StanceEval(Ex_name,logger,"test")
 
 
+if __name__ == '__main__': 
+  if config.USE_NLPAUG:
+    nlp_aug = [naw.RandomWordAug(action='delete', aug_p=config.NLPAUG_PROB),naw.SynonymAug(aug_src='ppdb', lang='arb',model_path ='/home/dr-nfs/m.badran/mawqif/ppdb-1.0-s-lexical',aug_p=config.NLPAUG_PROB)]
+    print(nlp_aug)
+  else:
+    nlp_aug = None
+  run(nlp_aug)
