@@ -1,0 +1,7 @@
+
+
+To get Predictions
+Install dependencies in requirements.txt
+Installed models from this Link and put them in the final_checkpoints
+Download blind dataset and add it path in config.py "BlindTestData_name"
+Run ensemble_predicit.py
