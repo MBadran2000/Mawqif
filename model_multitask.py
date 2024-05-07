@@ -118,6 +118,13 @@ def get_constrastive_loss(constrastive_loss, config, bert,n_classes=3):
     print("Using Constrastive Loss SignalToNoiseRatioContrastiveLoss")
     return losses.SignalToNoiseRatioContrastiveLoss()
 
+  elif constrastive_loss == 26:
+    print("Using Constrastive Loss NTXentLoss temperature=0.5")
+    return losses.NTXentLoss(temperature=0.5)
+  elif constrastive_loss == 27:
+    print("Using Constrastive Loss NTXentLoss temperature=0.5")
+    return losses.NTXentLoss(temperature=0.5)
+
   return None
 
 

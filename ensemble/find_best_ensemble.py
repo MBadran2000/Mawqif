@@ -5,6 +5,7 @@ import pandas as pd
 from itertools import combinations
 from collections import Counter
 from MyStanceEval_Final import log_StanceEval
+import shutil
 
 def find_max(row):
     # List = [row['Label1'],row['Label2'], row['Label3'], row['Label4'], row['Label5']]
@@ -25,7 +26,6 @@ combinations_list = list(combinations(results, 7))#7
 
 # combinations_list = combinations_list[:1000]
 print(len(combinations_list))
-# exit()
 
 outpath = '/home/dr-nfs/m.badran/mawqif/results/ensembles/'
 if not os.path.exists(outpath):
@@ -34,6 +34,8 @@ if not os.path.exists(outpath):
 best_comb = 0
 best_r = 0
 for i in range(len(combinations_list)):
+    print(i)
+
 
     df['Label1'] = df[combinations_list[i][0]].copy()
     df['Label2'] = df[combinations_list[i][1]].copy()
@@ -46,7 +48,11 @@ for i in range(len(combinations_list)):
     df['Label_ensemble'] = df.apply(find_max, axis=1)
     # print(combinations_list[i])
     # comb = combinations_list[i][0][11:]+combinations_list[i][1][10:]+combinations_list[i][2][10:]+combinations_list[i][3][10:]+combinations_list[i][4][10:]
-    comb = combinations_list[i][0][11:]+combinations_list[i][1][10:]+combinations_list[i][2][10:]+combinations_list[i][3][10:]+combinations_list[i][4][10:]+combinations_list[i][5][10:]+combinations_list[i][6][10:]
+    # comb = combinations_list[i][0][11:]+combinations_list[i][1][10:]+combinations_list[i][2][10:]+combinations_list[i][3][10:]+combinations_list[i][4][10:]+combinations_list[i][5][10:]+combinations_list[i][6][10:]
+    # comb = combinations_list[i][0][8:]+"-"+combinations_list[i][1][8:]+"-"+combinations_list[i][2][8:]+"-"+combinations_list[i][3][8:]+"-"+combinations_list[i][4][8:]
+    comb = combinations_list[i][0][8:]+"-"+combinations_list[i][1][8:]+"-"+combinations_list[i][2][8:]+"-"+combinations_list[i][3][8:]+"-"+combinations_list[i][4][8:]+"-"+combinations_list[i][5][8:]+"-"+combinations_list[i][6][8:]
+
+
 
     # print(comb)
 
@@ -76,9 +82,17 @@ for i in range(len(combinations_list)):
     if r > best_r:
         best_comb = comb
         best_r = r
-
     print(best_comb,best_r)
+    if i % 10000==0:
+        shutil.rmtree('/home/dr-nfs/m.badran/mawqif/results/ensembles/')
+        os.makedirs(outpath)
+
 
 ###101
 ## 11.14.13.9.19 0.8302006553887065
-##20.13.15.3.5 0.8395059369859195
+## 20.13.15.3.5 0.8395059369859195
+## 11.14.2.13.25.3.5 0.8365767891733066
+
+## 01.11-04.3-04.5-01.25-01.17-01.15-04.12 0.8380861288469984
+## 01.8-01.20-01.1-04.13-04.5-01.25-04.18 0.838996121256404
+#01.8-04.13-04.5-01.25-01.15 0.8432030970203455

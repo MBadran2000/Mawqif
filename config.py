@@ -2,7 +2,7 @@
 # TestData_name = 'All targets-Test.csv'
 TrainData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Train.csv'
 TestData_name = '/home/dr-nfs/m.badran/mawqif/All targets-Test.csv'
-BlindTestData_name = '/home/dr-nfs/m.badran/mawqif/Mawqif_AllTargets_Blind Test1.csv'
+BlindTestData_name = '/home/dr-nfs/m.badran/mawqif/Mawqif_AllTargets_Blind Test.csv'
 
 selectedTarget = [ 'Covid Vaccine', 'Women empowerment','Digital Transformation']
 # selectedTarget = ['All']
@@ -41,11 +41,11 @@ USE_PEFT = 0 # 0:None, 1:LoRA, 2:LoHa, 3:LoKr, 4:AdaLoRA
 LOSS = 0 # 0:CrossEntropyLoss, 1:LabelSmoothingCrossEntropyLoss, 2:FocalLoss
 FREEZE_BERT = False
 DROPOUT = 0.1
-CONTRASTIVE_LOSS = 25 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
+CONTRASTIVE_LOSS = 0 #0: None, 1:NTXentLoss, 2:AngularLoss, 3:ArcFaceLoss, 4:CircleLoss, 5:ContrastiveLoss, 6:CosFaceLoss
 #7:DynamicSoftMarginLoss, 8:FastAPLoss, 9:GeneralizedLiftedStructureLoss, 10:InstanceLoss, 11:HistogramLoss. 12:IntraPairVarianceLoss
 #13:TripletMarginLoss, 14:TupletMarginLoss, 15:SoftTripleLoss, 16:SphereFaceLoss
 # 17:LiftedStructureLoss, 18:MarginLoss, 19:MultiSimilarityLoss, 20:NCALoss, 21:NormalizedSoftmaxLoss
-# 22:PNPLoss, 23:ProxyAnchorLoss, 24:ProxyNCALoss, 25:SignalToNoiseRatioContrastiveLoss
+# 22:PNPLoss, 23:ProxyAnchorLoss, 24:ProxyNCALoss, 25:SignalToNoiseRatioContrastiveLoss #26:NTXentLoss temperature=0.5 
 CONTRASTIVE_LOSS_LAMBDA = 1
 USE_ARABERT_PRE = False
 

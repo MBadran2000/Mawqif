@@ -4,7 +4,7 @@ def log_StanceEval(fn_guess,logger=None,val_or_test="Test"):
     # folder_path ='-'.join(("checkpoints/"+Ex_name).split("-")[:-1]) 
     # fn_guess = folder_path+ "/"+val_or_test+"_pred_File.txt"
     # fn_gold = folder_path+ "/"+val_or_test+"_gt_file.txt"
-    fn_gold = '/home/dr-nfs/m.badran/mawqif/results/V101.0/test_gt_file.txt'
+    fn_gold = '/home/dr-nfs/m.badran/mawqif/results/V101.1/test_gt_file.txt'
 
     # logger.experiment.log_metric("val_or_test",val_or_test)
     try:

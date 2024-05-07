@@ -51,7 +51,7 @@ pl.seed_everything(42)
 
 
 def save_pred_gt_blind(  Comb_name,Ex_name,texts, predictions, texts_id,target):
-    print(texts)
+    # print(texts)
 
     mapping = {0:'NONE', 1:'FAVOR', 2:'AGAINST'}
     data_pred_1 = [mapping[t.item()] for t in predictions]
@@ -77,21 +77,33 @@ if __name__ == '__main__':
 
   config_dict = {attr: getattr(config, attr) for attr in dir(config) if not attr.startswith('__')}
   print(config_dict)
-  ensemble_versions = [ "V101.20","V101.13","V101.15","V101.3","V101.5"]
-  ensemble_versions = [ "V101.20","V101.13"]
+#   ensemble_versions = [ "V101.20","V101.13","V101.15","V101.3","V101.5"]
+  ensemble_versions = ["V101.8","V104.13","V104.5","V101.25","V101.15"]
+
+#   ensemble_versions = [ "V101.20","V101.13"]
 
   Comb_name = "".join(ensemble_versions)
   print(Comb_name)
+  
   config.USE_ARABERT_PRE = True ##True for 101, False for 104
   config.selectedModels= {'Women empowerment':"aubmindlab/bert-base-arabertv02-twitter",'Covid Vaccine':'moha/arabert_c19', 'Digital Transformation':"aubmindlab/bert-base-arabertv02-twitter"}
   config_dict['WEIGHTED_LOSS'] = False
   for v in ensemble_versions:
     config.Version = v
+    print("version: ",config.Version)
+    if "101" in v:
+        config.USE_ARABERT_PRE = True 
+        print("T"*20)
+    else:
+        config.USE_ARABERT_PRE = False
+        print("F"*20)
+
     for selectedTarget in config.selectedTarget:        
         if not config.selectedModels is None:     
             config.selectedModel = config.selectedModels[selectedTarget]
             config_dict['selectedModel']=config.selectedModels[selectedTarget]
             print('selected model:',config.selectedModel)
+        print("selectedTarget:",selectedTarget)
 
         Ex_name =  config.Version+"-"+selectedTarget.replace(" ","")
         arabert_prep = ArabertPreprocessor(model_name=config.selectedModel) if config.USE_ARABERT_PRE else None
@@ -132,7 +144,6 @@ if __name__ == '__main__':
 
 csv_files = [file for file in os.listdir("/home/dr-nfs/m.badran/mawqif/results/predictions/"+Comb_name) if file.endswith('.csv')]
 
-print(csv_files)
 
 combined_df =  None
 
@@ -158,10 +169,10 @@ combined_df = pd.merge(combined_df, df1, on=['ID', 'target'], how='outer')
 combined_df.to_csv("/home/dr-nfs/m.badran/mawqif/results/predictions/"+Comb_name+'/combined_data.csv', index=False)
 
 def find_max(row):
-    # List = [row['Stance1'],row['Stance2'], row['Stance3'], row['Stance4'], row['Stance5']]
+    List = [row['Stance1'],row['Stance2'], row['Stance3'], row['Stance4'], row['Stance5']]
     # List = [row['Stance1'],row['Stance2'], row['Stance3'], row['Stance4'], row['Stance5'], row['Stance6'], row['Stance7']]#7
-    List = [row['Stance1'],row['Stance2']]
-    # print(List, max((List), key = List.count))
+    # List = [row['Stance1'],row['Stance2']]
+    print(List, max((List), key = List.count))
     return max((List), key = List.count)
 
 df = pd.read_csv("/home/dr-nfs/m.badran/mawqif/results/predictions/"+Comb_name+'/combined_data.csv')
@@ -180,3 +191,5 @@ with open("/home/dr-nfs/m.badran/mawqif/results/predictions/"+Comb_name+'/Result
     for index, row in df.iterrows():
         # parts = line.strip().split('\t')
         csv_writer.writerow([row['ID'], row['target'], row['text'], row['Label_ensemble']])
+
+##539 covid

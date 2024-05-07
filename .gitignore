@@ -16,5 +16,6 @@ test_prompting2.py
 output.txt
 output2.txt
 results/
+results_101/
 final_checkpoints/
 .cometml-runs/
