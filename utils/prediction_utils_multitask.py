@@ -44,8 +44,6 @@ def predict(text, model, tokenizer):
   )
 
   _, prediction_prop = model(encoding["input_ids"], encoding["attention_mask"])
-  if isinstance(prediction_prop, dict):
-      prediction_prop = prediction_prop['logits']
   prediction_prop = prediction_prop.detach()
   print("prediction_prop: ",prediction_prop)
   prediction = torch.max(prediction_prop, dim=1)
@@ -62,9 +60,10 @@ def get_predictions(model, data_loader):
 
     text = item["text"]
     if "labels_no" in item.keys():
-      labels.append(item["labels_no"])
+      labels.append(item["labels_no"]['STA'])
     else:
-      labels.append(item["labels"])
+      labels.append(item["labels"]['STA'])
+    
 
     _, _, output = model(item["input_ids"].unsqueeze(dim=0), item["attention_mask"].unsqueeze(dim=0))
     if isinstance(output, dict):
@@ -104,10 +103,9 @@ def get_predictions_blind(model, data_loader):
   
     texts.append(text) # we can use .append instead of .extend
     predictions.extend(preds.detach())
-    texts_id.extend(tweet_id.detach())
+    texts_id.append(tweet_id)
 
 
   predictions = torch.stack(predictions).cpu()
-  texts_id = torch.stack(texts_id).cpu()
 
   return texts, predictions, texts_id
