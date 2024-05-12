@@ -4,7 +4,7 @@
    Ensure all dependencies listed in `requirements.txt` are installed.
 
 2. **Download Models:**
-   - Download the required models from [this link](https://drive.google.com/drive/folders/11hIM8mR4yffcvoA6zzqV9lCc5tp03CI-?usp=sharing) and place them in the `final_checkpoints` directory.
+   - Download the required models from [this link](https://drive.google.com/drive/folders/1lEF-5GXueAsmuafm4ocGVgYhXmNxFuTK?usp=drive_link) and place them in the `final_checkpoints` directory.
 
 3. **Download Blind Dataset:**
    - Download the blind dataset and specify its path in `config.py` under the variable `BlindTestData_name`.
