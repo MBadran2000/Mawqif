@@ -65,7 +65,11 @@ if __name__ == '__main__':
 
 
   for selectedTarget in config.selectedTarget:
-    Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
+    if not config.selectedModels is None:
+      config_dict['selectedModel'] = config.selectedModels[selectedTarget]
+      config.selectedModel = config.selectedModels[selectedTarget]
+    # Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-"+selectedTarget.replace(" ","")
+    Ex_name = config.Version+"-"+selectedTarget.replace(" ","")
     arabert_prep = ArabertPreprocessor(model_name=config.selectedModel) if config.USE_ARABERT_PRE else None
     tokenizer = AutoTokenizer.from_pretrained(config.selectedModel)
     model = AutoModel.from_pretrained(config.selectedModel)
@@ -164,8 +168,9 @@ if __name__ == '__main__':
     
     # exit()
 if len(config.selectedTarget) == 3 or config.selectedTarget[0] == "All":
-  Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
+  # Ex_name =  config.selectedModel.split('/')[-1]+"-"+config.Version+"-Overall"
   # config.selectedModel.split('/')[-1]+"-"+selectedTarget.replace(" ","")
+  Ex_name =  config.Version+"-Overall"
   logger = CometLogger(
       experiment_name=Ex_name ,
       api_key='jFe8sB6aGNDL7p2LHe9V99VNy',
